@@ -7,7 +7,7 @@ const HomePage = () => {
       <div className="homepage">
         <header className="header">
           <h1>Suraj Co-Operative Society</h1>
-          <button className="login-btn">Admin Login</button>
+          <button className="contact-btn">Contact us</button>
         </header>
         <main className="hero">
           <h2>Welcome to Our Society</h2>
@@ -20,6 +20,15 @@ const HomePage = () => {
           <li>Maintenance work scheduled for April 15th.</li>
           <li>Community cleanup drive on April 20th.</li>
         </ul>
+      </section>
+      <section className="view-documents">
+        <h2>View Documents</h2>
+        <p>Access important files related to the society’s redevelopment.</p>
+        <button className="view-docs-btn">View Documents</button>
+      </section>
+      <section className="admin-panel">
+        <h2>Admin Panel</h2>
+        <button className="admin-btn">Admin Login</button>
       </section>
         <footer className="footer">
           <p>&copy; 2025 Suraj Cooperative Society. All rights reserved.</p>
