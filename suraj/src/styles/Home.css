@@ -1,0 +1,17 @@
+
+/* AdminDashboard.css */
+
+/* Main dashboard styling */
+.admin-dashboard {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+  }
+  
+  /* Sidebar styles */
+  .sidebar {
+    background-color: #343a40 !important;
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }

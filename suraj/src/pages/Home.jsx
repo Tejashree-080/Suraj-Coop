@@ -251,7 +251,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="admin-dashboard" >
+    <div className="admin-dashboard" style={customStyles.gradientBg}>
       <div className="container-fluid">
         <div className="row">
           {/* Sidebar */}
@@ -263,24 +263,27 @@ const AdminDashboard = () => {
               <ul className="nav flex-column">
                 {[
                   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-                  { id: 'announcements', label: 'Post Announcements', icon: '📢' },
+                  { id: 'announcements', label: 'Announcements', icon: '📢' },
                   { id: 'gallery', label: 'Gallery', icon: '🖼️' },
-                  { id: 'documents', label: 'Upload Documents', icon: '📄' },
-                  { id: 'users', label: 'Manage Users', icon: '👥' },
+                  { id: 'documents', label: 'Documents', icon: '📄' },
+                  { id: 'users', label: 'Users', icon: '👥' },
+                  { id: 'settings', label: 'Settings', icon: '⚙️' },
                 ].map((item) => (
                   <li className="nav-item" key={item.id}>
                     <button
                       onClick={() => setActiveTab(item.id)}
                       className={`nav-link ${activeTab === item.id ? 'active' : ''}`}
-                      style={customStyles.pinkishPurple}
                     >
-                      <span className="me-2" >{item.icon}</span>
+                      <span className="me-2">{item.icon}</span>
                       {item.label}
                     </button>
                   </li>
                 ))}
               </ul>
-              <button
+              <div className="position-absolute bottom-0 w-100 p-3 text-center" style={customStyles.footerBg}>
+                <p className="text-muted mb-1" style={customStyles.footerText}>Logged in as</p>
+                <p className="mb-3" style={customStyles.footerText}>Admin User</p>
+                <button
                   className="btn w-100"
                   style={customStyles.outlineButton}
                   onClick={() => {
@@ -292,6 +295,7 @@ const AdminDashboard = () => {
                 >
                   Logout
                 </button>
+              </div>
             </div>
           </nav>
           {/* Main Content */}
@@ -306,12 +310,13 @@ const AdminDashboard = () => {
                       className="btn btn-primary me-2"
                       onClick={() => openModal('announcement')}
                     >
-                      New Announcement
+                      <span>📢</span> New Announcement
                     </button>
                     <button 
                       className="btn btn-secondary"
                       onClick={() => openModal('upload')}
-                    > Upload Files
+                    >
+                      <span>📤</span> Upload Files
                     </button>
                   </div>
                 </div>
@@ -326,6 +331,7 @@ const AdminDashboard = () => {
                             <h6 className="text-uppercase">Total Announcements</h6>
                             <h1 className="display-4">{announcements.length}</h1>
                           </div>
+                          <div className="text-white fs-1">📢</div>
                         </div>
                       </div>
                     </div>
@@ -338,6 +344,7 @@ const AdminDashboard = () => {
                             <h6 className="text-uppercase">Total Documents</h6>
                             <h1 className="display-4">{documents.length}</h1>
                           </div>
+                          <div className="text-white fs-1">📄</div>
                         </div>
                       </div>
                     </div>
@@ -350,6 +357,7 @@ const AdminDashboard = () => {
                             <h6 className="text-uppercase">Total Images</h6>
                             <h1 className="display-4">{images.length}</h1>
                           </div>
+                          <div className="text-white fs-1">🖼️</div>
                         </div>
                       </div>
                     </div>
@@ -769,6 +777,7 @@ const AdminDashboard = () => {
                   <div className="row text-center">
                     <div className="col-md-6">
                       <div className="p-4 border rounded mb-3">
+                        <h3>📄</h3>
                         <h5>Document</h5>
                         <p className="text-muted">Upload PDF, Word, Excel files</p>
                         <button 
@@ -781,6 +790,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="col-md-6">
                       <div className="p-4 border rounded mb-3">
+                        <h3>🖼️</h3>
                         <h5>Image</h5>
                         <p className="text-muted">Upload JPG, PNG, GIF files</p>
                         <button 

@@ -198,12 +198,7 @@ const LandingPage = () => {
                     {announcement.date}
                   </div>
                   <h3 className="fs-3 fw-bold mb-3 text-center">{announcement.title}</h3>
-                  <p className="text-center mx-auto" style={{ maxWidth: "600px" }}>{announcement.details}</p>
-                  <div className="mt-4">
-                    <button className="btn px-4 py-2 rounded-3" style={customStyles.primaryButton}>
-                      Learn More
-                    </button>
-                  </div>
+                  <p className="text-center mx-auto" style={{ maxWidth: "600px" }}>{announcement.content}</p>
                 </div>
               ))}
             </div>
