@@ -17,7 +17,6 @@ const LandingPage = () => {
   useEffect(() => {
     const announcementsRef = ref(database, 'announcements');
     const documentsRef = ref(database, 'documents');
-    const galleryRef = ref(database, 'gallery');
 
     // Fetch announcements
     onValue(announcementsRef, (snapshot) => {
@@ -30,19 +29,30 @@ const LandingPage = () => {
       const data = snapshot.val();
       setDocuments(data ? Object.values(data) : []);
     });
+  }, []);
 
-    // Fetch gallery images
+  // Fetch gallery images
+  useEffect(() => {
+    const galleryRef = ref(database, 'images');
+
     onValue(galleryRef, async (snapshot) => {
       const data = snapshot.val();
-      if (data) {
+      console.log("Gallery Data:", data); // Debug log to verify data structure
+      if (data && typeof data === 'object') {
         const images = await Promise.all(
           Object.values(data).map(async (item) => {
-            const url = await getDownloadURL(storageRef(storage, item.path));
+            const url = item.url || await getDownloadURL(storageRef(storage, item.path));
             return { ...item, url };
           })
         );
         setGalleryImages(images);
+      } else {
+        console.warn("No gallery data found or invalid structure.");
+        setGalleryImages([]); // Ensure galleryImages is an empty array if no data
       }
+    }, (error) => {
+      console.error("Error fetching gallery data:", error);
+      setGalleryImages([]); // Handle Firebase errors gracefully
     });
   }, []);
 
@@ -273,28 +283,32 @@ const LandingPage = () => {
       <section id="gallery" className="py-5">
         <div className="container py-3">
           <h2 className="h2 fw-bold mb-5 text-center">Construction Progress</h2>
-          <div className="row g-4 justify-content-center color-white">
-            {galleryImages.map((image, index) => (
-              <div key={index} className="col-md-4 col-sm-6">
-                <div className="card h-100 border-0 shadow rounded-4 overflow-hidden" style={customStyles.cardBg}>
-                  <div style={{ height: "200px", overflow: "hidden" }}>
-                    <img
-                      src={image.url}
-                      alt={image.title}
-                      className="w-100 h-100 object-fit-cover"
-                      style={{ transition: "transform 500ms", transformOrigin: "center" }}
-                      onMouseOver={(e) => e.target.style.transform = "scale(1.1)"}
-                      onMouseOut={(e) => e.target.style.transform = "scale(1)"}
-                    />
-                  </div>
-                  <div className="card-body">
-                    <h3 className="fw-bold fs-5 mb-1 color-white">{image.title}</h3>
-                    <p className="small" style={customStyles.dateBadge}>{image.date}</p>
+          {galleryImages.length === 0 ? (
+            <p className="text-center text-muted">No images available at the moment.</p>
+          ) : (
+            <div className="row g-4 justify-content-center color-white">
+              {galleryImages.map((image, index) => (
+                <div key={index} className="col-md-4 col-sm-6">
+                  <div className="card h-100 border-0 shadow rounded-4 overflow-hidden" style={customStyles.cardBg}>
+                    <div style={{ height: "200px", overflow: "hidden" }}>
+                      <img
+                        src={image.url}
+                        alt={image.name || "Gallery Image"}
+                        className="w-100 h-100 object-fit-cover"
+                        style={{ transition: "transform 500ms", transformOrigin: "center" }}
+                        onMouseOver={(e) => e.target.style.transform = "scale(1.1)"}
+                        onMouseOut={(e) => e.target.style.transform = "scale(1)"}
+                      />
+                    </div>
+                    <div className="card-body  color-white">
+                      <h3 className="fw-bold fs-5 mb-1">{image.name}</h3>
+                      <p className="small" style={customStyles.dateBadge}>{image.uploadDate}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
           <div className="d-flex justify-content-center mt-4">
             <button className="btn px-4 py-2 rounded-3 fw-medium" style={customStyles.purpleButton}>
               View All Photos
@@ -328,12 +342,18 @@ const LandingPage = () => {
                     </div>
                     <div>
                       <h4 className="fw-medium mb-0">{doc.name}</h4>
-                      <p className="small mb-0" style={customStyles.dateBadge}>{doc.date}</p>
+                      <p className="small mb-0" style={customStyles.dateBadge}>{doc.uploadDate}</p>
                     </div>
                   </div>
-                  <button className="btn btn-sm rounded-3 px-3" style={customStyles.primaryButton}>
+                  <a
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-sm rounded-3 px-3"
+                    style={customStyles.primaryButton}
+                  >
                     Download
-                  </button>
+                  </a>
                 </div>
               ))}
             </div>
