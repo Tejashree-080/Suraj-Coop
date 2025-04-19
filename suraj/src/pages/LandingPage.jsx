@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ref, onValue } from 'firebase/database';
@@ -13,43 +14,51 @@ const LandingPage = () => {
   const [galleryImages, setGalleryImages] = useState([]);
   const [activeAnnouncement, setActiveAnnouncement] = useState(0);
   const [isMouseInside, setIsMouseInside] = useState(true);
-  const isMouseInsideRef = useRef(true); // Add a ref to track mouse state across event handlers
+  const isMouseInsideRef = useRef(true);
+  const antiScreenshotStyleRef = useRef(null);
+  const metaTagRef = useRef(null);
+  const overlayRef = useRef(null);
   const navigate = useNavigate();
 
-  // Update ref when state changes to ensure latest value in event handlers
+  // Update ref when state changes
   useEffect(() => {
     isMouseInsideRef.current = isMouseInside;
   }, [isMouseInside]);
 
-  // Setup anti-screenshot overlay
+  // Setup anti-screenshot overlay - modified to use refs
   const setupAntiScreenshotOverlay = useCallback(() => {
-    let overlay = document.getElementById("anti-screenshot-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.id = "anti-screenshot-overlay";
-      overlay.style.position = "fixed";
-      overlay.style.top = "0";
-      overlay.style.left = "0";
-      overlay.style.width = "100vw";
-      overlay.style.height = "100vh";
-      overlay.style.backdropFilter = "blur(5px)";
-      overlay.style.webkitBackdropFilter = "blur(5px)";
-      overlay.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
-      overlay.style.zIndex = "2147483647"; // Maximum z-index
-      overlay.style.pointerEvents = "none";
-      overlay.style.transition = "all 0.1s ease";
-      overlay.style.opacity = "0.05";
-      document.body.appendChild(overlay);
+    // Clean up any existing overlay first to prevent duplicates
+    if (overlayRef.current && overlayRef.current.parentNode) {
+      overlayRef.current.parentNode.removeChild(overlayRef.current);
     }
+    
+    // Create a new overlay
+    let overlay = document.createElement("div");
+    overlay.id = "anti-screenshot-overlay-landing";
+    overlay.style.position = "fixed";
+    overlay.style.top = "0";
+    overlay.style.left = "0";
+    overlay.style.width = "100vw";
+    overlay.style.height = "100vh";
+    overlay.style.backdropFilter = "blur(5px)";
+    overlay.style.webkitBackdropFilter = "blur(5px)";
+    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+    overlay.style.zIndex = "2147483647";
+    overlay.style.pointerEvents = "none";
+    overlay.style.transition = "all 0.1s ease";
+    overlay.style.opacity = "0.05";
+    document.body.appendChild(overlay);
+    
+    // Store reference for cleanup
+    overlayRef.current = overlay;
     return overlay;
   }, []);
 
-  // Enhanced blur overlay function with immediate effect
+  // Enable blur overlay - modified to use refs
   const enableBlurOverlay = useCallback(() => {
-    console.log("Enabling blur overlay");
-    let overlay = document.getElementById("anti-screenshot-overlay") || setupAntiScreenshotOverlay();
+    console.log("Landing Page: Enabling blur overlay");
+    let overlay = document.getElementById("anti-screenshot-overlay-landing") || setupAntiScreenshotOverlay();
 
-    // Stop any ongoing transitions and apply maximum blur immediately
     overlay.style.transition = "none";
     requestAnimationFrame(() => {
       overlay.style.backdropFilter = "blur(30px)";
@@ -57,16 +66,13 @@ const LandingPage = () => {
       overlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
       overlay.style.opacity = "1";
 
-      // Re-enable transitions after applying styles
       requestAnimationFrame(() => {
         overlay.style.transition = "all 0.1s ease";
       });
     });
 
-    // Add warning text
     overlay.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:32px;text-align:center;font-weight:bold;text-shadow:2px 2px 4px #000;"></div>';
 
-    // Hide all sensitive content
     const sensitiveElements = document.querySelectorAll('.sensitive-content');
     sensitiveElements.forEach(el => {
       el.dataset.originalContent = el.textContent;
@@ -74,17 +80,16 @@ const LandingPage = () => {
     });
   }, [setupAntiScreenshotOverlay]);
 
-  // Enhanced reset overlay function that ONLY resets when mouse is confirmed inside
+  // Reset overlay - modified to use refs
   const resetOverlay = useCallback(() => {
-    const overlay = document.getElementById("anti-screenshot-overlay");
+    const overlay = document.getElementById("anti-screenshot-overlay-landing");
     if (overlay && isMouseInsideRef.current) {
-      console.log("Resetting overlay, mouse is inside:", isMouseInsideRef.current);
+      console.log("Landing Page: Resetting overlay, mouse is inside:", isMouseInsideRef.current);
       overlay.style.backdropFilter = "blur(0px)";
       overlay.style.webkitBackdropFilter = "blur(0px)";
       overlay.style.opacity = "0.1";
       overlay.innerHTML = '';
 
-      // Restore sensitive content
       const sensitiveElements = document.querySelectorAll('.sensitive-content');
       sensitiveElements.forEach(el => {
         if (el.dataset.originalContent) {
@@ -142,96 +147,95 @@ const LandingPage = () => {
     return () => clearInterval(interval);
   }, [announcements]);
 
-  // Enhanced anti-screenshot protection with persistent blur until mouse return
+  // Anti-screenshot protection setup - isolated to this component
   useEffect(() => {
+    console.log("Landing Page: Setting up anti-screenshot protection");
+    
     // Set up the initial overlay
     setupAntiScreenshotOverlay();
 
-    // Improved mouse tracking with proper event handling
+    // Mouse tracking handlers
     const handleMouseLeave = (e) => {
-      // Check if the mouse is actually leaving the window
       if (e.relatedTarget === null || !document.documentElement.contains(e.relatedTarget)) {
-        console.log("Mouse genuinely left window");
-        setIsMouseInside(false);
-        isMouseInsideRef.current = false; // Update ref immediately for event handlers
-        enableBlurOverlay();
-        // No auto-reset - blur stays until mouse returns
-      }
-    };
-
-    // Handle mouse entering the window with improved detection
-    const handleMouseEnter = (e) => {
-      // Check if mouse is coming from outside the window
-      if (e.relatedTarget === null || !document.documentElement.contains(e.relatedTarget)) {
-        console.log("Mouse genuinely entered window");
-        setIsMouseInside(true);
-        isMouseInsideRef.current = true; // Update ref immediately for event handlers
-        resetOverlay(); // Reset only when mouse returns
-      }
-    };
-
-    // More specific window-level mouse events for better detection
-    window.addEventListener("mouseout", (e) => {
-      if (e.relatedTarget === null && e.target === document.documentElement) {
-        console.log("Mouse left window via window.mouseout");
+        console.log("Landing Page: Mouse genuinely left window");
         setIsMouseInside(false);
         isMouseInsideRef.current = false;
         enableBlurOverlay();
-        // No auto-reset - blur stays until mouse returns
+      }
+    };
+
+    const handleMouseEnter = (e) => {
+      if (e.relatedTarget === null || !document.documentElement.contains(e.relatedTarget)) {
+        console.log("Landing Page: Mouse genuinely entered window");
+        setIsMouseInside(true);
+        isMouseInsideRef.current = true;
+        resetOverlay();
+      }
+    };
+
+    // Setup window-level mouse events
+    window.addEventListener("mouseout", (e) => {
+      if (e.relatedTarget === null && e.target === document.documentElement) {
+        console.log("Landing Page: Mouse left window via window.mouseout");
+        setIsMouseInside(false);
+        isMouseInsideRef.current = false;
+        enableBlurOverlay();
       }
     }, { capture: true });
 
     window.addEventListener("mouseover", (e) => {
       if (e.target === document.documentElement && (e.relatedTarget === null || !document.documentElement.contains(e.relatedTarget))) {
-        console.log("Mouse entered window via window.mouseover");
+        console.log("Landing Page: Mouse entered window via window.mouseover");
         setIsMouseInside(true);
         isMouseInsideRef.current = true;
-        resetOverlay(); // Reset only when mouse returns
+        resetOverlay();
       }
     }, { capture: true });
 
-    // Add mousemove detection as a fallback
+    // Mouse movement detection
     let mouseActivityTimeout;
     const handleMouseMove = () => {
       if (!isMouseInsideRef.current) {
-        console.log("Mouse movement detected, mouse must be inside");
+        console.log("Landing Page: Mouse movement detected, mouse must be inside");
         setIsMouseInside(true);
         isMouseInsideRef.current = true;
         resetOverlay();
       }
 
-      // Reset timeout on each mouse movement
       clearTimeout(mouseActivityTimeout);
-
-      // If no mouse movement for 5 seconds, check if mouse might have left the window
       mouseActivityTimeout = setTimeout(() => {
-        // Only enable blur if mouse is already set as inside (prevents false triggers)
-        if (isMouseInsideRef.current) {
-          // Check if mouse is actually outside using document.hasFocus()
-          if (!document.hasFocus()) {
-            console.log("No recent mouse activity and window not focused, assuming mouse left");
-            setIsMouseInside(false);
-            isMouseInsideRef.current = false;
-            enableBlurOverlay();
-            // No auto-reset - blur stays until mouse returns
-          }
+        if (isMouseInsideRef.current && !document.hasFocus()) {
+          console.log("Landing Page: No recent mouse activity and window not focused, assuming mouse left");
+          setIsMouseInside(false);
+          isMouseInsideRef.current = false;
+          enableBlurOverlay();
         }
       }, 5000);
     };
 
-    // More aggressive capture of key events for F11 and PrintScreen
+    // Key event handlers
     const disableKeys = (e) => {
-      // Debug logging
-      console.log(`Key pressed: ${e.key}, keyCode: ${e.keyCode}, code: ${e.code}`);
-
-      // Check for F11 (Full screen)
+      // Print Screen
+      if (e.key === "PrintScreen" || e.keyCode === 44 || e.code === "PrintScreen") {
+        console.log("Landing Page: PrintScreen detected");
+        e.preventDefault();
+        e.stopPropagation();
+        enableBlurOverlay();
+        
+        setTimeout(() => {
+          alert("Screenshots are disabled on this website.");
+          if (isMouseInsideRef.current) resetOverlay();
+        }, 100);
+        return false;
+      }
+      
+      // F11 (Full screen)
       if (e.key === "F11" || e.keyCode === 122 || e.code === "F11") {
-        console.log("F11 detected - blocking fullscreen");
+        console.log("Landing Page: F11 detected - blocking fullscreen");
         e.preventDefault();
         e.stopPropagation();
         enableBlurOverlay();
 
-        // Exit fullscreen if somehow activated
         if (document.fullscreenElement) {
           document.exitFullscreen().catch(err => {
             console.error(`Error exiting fullscreen: ${err.message}`);
@@ -240,59 +244,36 @@ const LandingPage = () => {
 
         setTimeout(() => {
           alert("Full screen mode is disabled on this website.");
-          // Only reset if mouse is inside
           if (isMouseInsideRef.current) resetOverlay();
         }, 100);
         return false;
       }
 
-      // Check for PrintScreen
-      if (e.key === "PrintScreen" || e.keyCode === 44 || e.code === "PrintScreen") {
-        console.log("PrintScreen detected");
-        e.preventDefault();
-        e.stopPropagation();
-        enableBlurOverlay();
-
-        setTimeout(() => {
-          alert("Screenshots are disabled on this website.");
-          // Only reset if mouse is inside
-          if (isMouseInsideRef.current) resetOverlay();
-        }, 100);
-        return false;
-      }
-
-      // Prevent ALL function keys
+      // Function keys
       if ((e.key && e.key.startsWith("F") && !isNaN(parseInt(e.key.substring(1)))) ||
         (e.keyCode >= 112 && e.keyCode <= 123)) {
-        console.log(`Function key detected: ${e.key}`);
+        console.log(`Landing Page: Function key detected: ${e.key}`);
         enableBlurOverlay();
         e.preventDefault();
         e.stopPropagation();
-        // Only reset if mouse is inside
         if (isMouseInsideRef.current) resetOverlay();
         return false;
       }
 
-      // Block Windows key combinations
+      // Windows key
       if (e.key === "Meta" || e.keyCode === 91 || e.keyCode === 92) {
-        console.log("Windows/Meta key detected");
+        console.log("Landing Page: Windows/Meta key detected");
         enableBlurOverlay();
         e.preventDefault();
         e.stopPropagation();
-        // Only reset if mouse is inside
         if (isMouseInsideRef.current) resetOverlay();
         return false;
       }
 
-      // Block Ctrl, Shift, and Alt combinations
+      // Key combinations
       if (e.ctrlKey || e.shiftKey || e.altKey) {
-        // List of all potentially dangerous key combinations
         const dangerousCombos = [
-          { ctrl: true, key: "s" },        // Save
           { ctrl: true, key: "p" },        // Print
-          { ctrl: true, key: "c" },        // Copy
-          { ctrl: true, key: "x" },        // Cut
-          { ctrl: true, key: "a" },        // Select all
           { ctrl: true, shift: true, key: "i" }, // Dev tools
           { ctrl: true, shift: true, key: "j" }, // Dev tools
           { ctrl: true, shift: true, key: "c" }, // Dev tools
@@ -300,67 +281,59 @@ const LandingPage = () => {
           { ctrl: true, key: "u" },        // View source
           { alt: true, key: "PrintScreen" }, // Window screenshot
           { shift: true, key: "PrintScreen" }, // Screenshot options
-          { alt: true, key: "Tab" },       // Switch windows
         ];
 
-        // Check for any of these combinations
         for (const combo of dangerousCombos) {
           if ((combo.ctrl && e.ctrlKey) &&
             (!combo.shift || (combo.shift && e.shiftKey)) &&
             (!combo.alt || (combo.alt && e.altKey)) &&
             (e.key.toLowerCase() === combo.key.toLowerCase())) {
 
-            // Only allow copy if text is selected
+            // Allow copy if text is selected
             if (combo.key === "c" && e.ctrlKey && !e.shiftKey && !e.altKey &&
               window.getSelection().toString() !== "") {
               return; // Allow legitimate text copying
             }
 
-            console.log(`Dangerous key combo detected: ${JSON.stringify(combo)}`);
+            console.log(`Landing Page: Dangerous key combo detected: ${JSON.stringify(combo)}`);
             enableBlurOverlay();
             e.preventDefault();
             e.stopPropagation();
-            // Only reset if mouse is inside
             if (isMouseInsideRef.current) resetOverlay();
             return false;
           }
         }
       }
 
-      // Windows specific screenshot combination (Win+Shift+S)
+      // Windows specific screenshot (Win+Shift+S)
       if ((e.metaKey || e.key === "Meta") && e.shiftKey && (e.key === "s" || e.key === "S")) {
-        console.log("Windows snipping tool shortcut detected");
+        console.log("Landing Page: Windows snipping tool shortcut detected");
         enableBlurOverlay();
         e.preventDefault();
         e.stopPropagation();
-        // No auto-reset - blur stays until mouse returns
         return false;
       }
 
       // Mac specific screenshot shortcuts (Cmd+Shift+3, Cmd+Shift+4)
       if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
-        console.log("Mac screenshot shortcut detected");
+        console.log("Landing Page: Mac screenshot shortcut detected");
         enableBlurOverlay();
         e.preventDefault();
         e.stopPropagation();
-        // No auto-reset - blur stays until mouse returns
         return false;
       }
     };
 
-    // Enhanced fullscreen change detection
+    // Fullscreen handler
     function handleFullscreenChange() {
-      console.log("Fullscreen change detected");
-      enableBlurOverlay(); // Immediately blur
+      console.log("Landing Page: Fullscreen change detected");
+      enableBlurOverlay();
 
-      // Check if fullscreen is active
       if (document.fullscreenElement ||
         document.webkitFullscreenElement ||
         document.mozFullScreenElement ||
         document.msFullscreenElement) {
-        console.log("Exiting fullscreen");
 
-        // Try to exit fullscreen in all possible browser variants
         if (document.exitFullscreen) {
           document.exitFullscreen().catch(err => {
             console.error(`Error exiting fullscreen: ${err.message}`);
@@ -374,84 +347,47 @@ const LandingPage = () => {
         }
       }
 
-      // Only reset if mouse is inside
       if (isMouseInsideRef.current) resetOverlay();
     }
 
-    // Handle mobile-specific screenshot attempts
+    // Touch handlers
     const handleTouchStart = (e) => {
-      console.log(`Touch start with ${e.touches.length} touches`);
-      // Detect multi-finger gestures (common for screenshots)
       if (e.touches.length >= 2) {
-        enableBlurOverlay(); // Make screen blurred immediately
-        // No auto-reset - blur stays until mouse returns
+        enableBlurOverlay();
       }
     };
 
-    // Advanced touch handling for mobile screenshots
     let lastTouchEnd = 0;
     const handleTouchEnd = (e) => {
       const now = Date.now();
-      console.log(`Touch end with ${e.touches ? e.touches.length : 0} remaining touches`);
-
       if (now - lastTouchEnd <= 300) {
-        // Double tap detected - might be screenshot on some devices
-        console.log("Double tap detected");
         enableBlurOverlay();
-        // No auto-reset - blur stays until explicit mouse action
       }
-
       if ((e.touches && e.touches.length >= 2) ||
         (e.targetTouches && e.targetTouches.length >= 2)) {
-        console.log("Multi-touch end detected");
         enableBlurOverlay();
-        // No auto-reset - blur stays until explicit mouse action
       }
-
       lastTouchEnd = now;
     };
 
-    // Handle power button press combination (typical for mobile screenshots)
-    let volumePressed = false;
-    const handleVolumeKeyDown = (e) => {
-      // Volume down key (common for screenshots when combined with power)
-      if (e.key === "Volume_Down" || e.keyCode === 182 || e.keyCode === 174) {
-        console.log("Volume down detected");
-        volumePressed = true;
-        enableBlurOverlay();
-        // No auto-reset - blur stays until explicit mouse action
-      }
-    };
-
-    const handleVolumeKeyUp = () => {
-      console.log("Volume key up");
-      volumePressed = false;
-      // Only reset if mouse is inside
-      if (isMouseInsideRef.current) resetOverlay();
-    };
-
-    // Handle visibility changes (app switching, which might be used for screen recording)
+    // Visibility change handler
     const handleVisibilityChange = () => {
-      console.log(`Visibility changed: ${document.visibilityState}`);
+      console.log(`Landing Page: Visibility changed: ${document.visibilityState}`);
       if (document.visibilityState === "hidden") {
         enableBlurOverlay();
       } else if (document.visibilityState === "visible") {
-        // Only reset if mouse is inside
         if (isMouseInsideRef.current) resetOverlay();
       }
     };
 
-    // Handle blur event (when window loses focus)
+    // Focus/blur handlers
     const handleBlur = () => {
-      console.log("Window lost focus");
+      console.log("Landing Page: Window lost focus");
       enableBlurOverlay();
-      // No auto-reset - blur stays until explicit mouse action
     };
 
-    // Handle focus event (when window gains focus)
     const handleFocus = () => {
-      console.log("Window gained focus");
-      // Only reset if mouse is inside
+      console.log("Landing Page: Window gained focus");
       if (isMouseInsideRef.current) {
         resetOverlay();
       }
@@ -459,13 +395,14 @@ const LandingPage = () => {
 
     // Disable right-click menu
     const disableContextMenu = (e) => {
-      console.log("Context menu blocked");
+      console.log("Landing Page: Context menu blocked");
       e.preventDefault();
       return false;
     };
 
-    // Apply CSS-based protection
+    // Apply CSS protection - store ref for cleanup
     const antiScreenshotStyle = document.createElement('style');
+    antiScreenshotStyle.id = 'landing-page-anti-screenshot-style';
     antiScreenshotStyle.textContent = `
       @media print {
         body * {
@@ -485,94 +422,42 @@ const LandingPage = () => {
         }
       }
       
-      /* Additional protection against screenshot utilities */
-      body.screenshot-protection * {
-        transition: opacity 0.01s; /* Fast transition to catch rapid state changes */
+      .landing-screenshot-protection * {
+        transition: opacity 0.01s;
       }
       
-      /* Enhanced fullscreen protection */
       :fullscreen, ::backdrop {
         background-color: rgba(0,0,0,0.9) !important;
       }
       
-      .anti-screenshot-protection * {
+      .landing-anti-screenshot * {
         user-select: none !important;
         -webkit-user-select: none !important;
       }
     `;
     document.head.appendChild(antiScreenshotStyle);
-    document.body.classList.add('screenshot-protection');
-    document.body.classList.add('anti-screenshot-protection');
+    antiScreenshotStyleRef.current = antiScreenshotStyle;
+    
+    document.body.classList.add('landing-screenshot-protection');
+    document.body.classList.add('landing-anti-screenshot');
 
-    // Handle special mobile gestures
-    let startY = 0;
-    const handleTouchMove = (e) => {
-      if (e.touches && e.touches[0]) {
-        const currentY = e.touches[0].clientY;
-
-        // Check for swipe from top (might be screenshot/recording gesture on some devices)
-        if (startY < 20 && currentY > startY + 50) {
-          console.log("Top swipe detected");
-          enableBlurOverlay();
-          // No auto-reset - blur stays until explicit mouse action
-        }
-
-        // Check for multi-touch gestures
-        if (e.touches.length > 1) {
-          console.log("Multi-touch move detected");
-          enableBlurOverlay();
-          // No auto-reset - blur stays until explicit mouse action
-        }
-      }
-    };
-
-    const handleTouchStart2 = (e) => {
-      if (e.touches && e.touches[0]) {
-        startY = e.touches[0].clientY;
-      }
-    };
-
-    // Set up viewport to prevent zooming (can be used for screen capture)
+    // Apply viewport restriction - store ref for cleanup
     const metaTag = document.createElement("meta");
+    metaTag.id = "landing-anti-screenshot-viewport";
     metaTag.name = "viewport";
     metaTag.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
     document.head.appendChild(metaTag);
+    metaTagRef.current = metaTag;
 
-    // Screen orientation change handler
-    const handleOrientationChange = () => {
-      console.log("Orientation changed");
-      enableBlurOverlay();
-      // No auto-reset - blur stays until explicit mouse action
-    };
-
-    // Copy event handler
-    const handleCopy = () => {
-      console.log("Copy detected");
-      enableBlurOverlay();
-      // No auto-reset - blur stays until explicit mouse action
-    };
-
-    // Special debug overlay for printscreen detection
-    window.debugAntiScreenshot = {
-      printscreenDetected: () => {
-        console.log("PrintScreen detected through debug");
-        enableBlurOverlay();
-        // No auto-reset - blur stays until explicit mouse action
-      }
-    };
-
-    // Add focus/blur check interval as a redundancy for mouse tracking
+    // Set up focus check interval
     const focusCheckInterval = setInterval(() => {
       if (document.hasFocus()) {
-        // If window has focus but mouse is marked as outside, we don't auto-correct anymore
-        // We wait for actual mouse movement or mouseenter event
         if (!isMouseInsideRef.current) {
-          console.log("Window has focus but mouse marked as outside, waiting for explicit mouse action");
+          console.log("Landing Page: Window has focus but mouse marked as outside, waiting for explicit mouse action");
         }
       } else {
-        // If window doesn't have focus, mouse might be outside
         if (isMouseInsideRef.current) {
-          console.log("Window lost focus, mouse might be outside");
+          console.log("Landing Page: Window lost focus, mouse might be outside");
           setIsMouseInside(false);
           isMouseInsideRef.current = false;
           enableBlurOverlay();
@@ -585,35 +470,33 @@ const LandingPage = () => {
     document.addEventListener("keyup", disableKeys, { capture: true, passive: false });
     document.addEventListener("touchstart", handleTouchStart, { capture: true, passive: false });
     document.addEventListener("touchend", handleTouchEnd, { capture: true, passive: false });
-    document.addEventListener("touchmove", handleTouchMove, { capture: true, passive: false });
-    document.addEventListener("touchstart", handleTouchStart2, { capture: true, passive: false });
     document.addEventListener("visibilitychange", handleVisibilityChange, { capture: true });
     document.addEventListener("blur", handleBlur, { capture: true });
     document.addEventListener("focus", handleFocus, { capture: true });
     document.addEventListener("contextmenu", disableContextMenu, { capture: true, passive: false });
-
-    // Improved mouse tracking with better event handlers
     document.addEventListener("mouseleave", handleMouseLeave, { capture: true });
     document.addEventListener("mouseenter", handleMouseEnter, { capture: true });
     document.addEventListener("mousemove", handleMouseMove, { capture: true });
-
     document.addEventListener("fullscreenchange", handleFullscreenChange, { capture: true });
     document.addEventListener("webkitfullscreenchange", handleFullscreenChange, { capture: true });
     document.addEventListener("mozfullscreenchange", handleFullscreenChange, { capture: true });
     document.addEventListener("MSFullscreenChange", handleFullscreenChange, { capture: true });
-    document.addEventListener("orientationchange", handleOrientationChange, { capture: true });
-    document.addEventListener("keydown", handleVolumeKeyDown, { capture: true });
-    document.addEventListener("keyup", handleVolumeKeyUp, { capture: true });
-    document.addEventListener("copy", handleCopy, { capture: true });
+    
+    // Special debug overlay for printscreen detection
+    window.landingPageDebugAntiScreenshot = {
+      printscreenDetected: () => {
+        console.log("Landing Page: PrintScreen detected through debug");
+        enableBlurOverlay();
+      }
+    };
 
-    // Cleanup on component unmount
+    // CRITICAL: Comprehensive cleanup on component unmount
     return () => {
+      console.log("Landing Page: Cleaning up anti-screenshot protection");
       document.removeEventListener("keydown", disableKeys);
       document.removeEventListener("keyup", disableKeys);
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchend", handleTouchEnd);
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("touchstart", handleTouchStart2);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("blur", handleBlur);
       document.removeEventListener("focus", handleFocus);
@@ -625,10 +508,6 @@ const LandingPage = () => {
       document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
       document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
       document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
-      document.removeEventListener("orientationchange", handleOrientationChange);
-      document.removeEventListener("keydown", handleVolumeKeyDown);
-      document.removeEventListener("keyup", handleVolumeKeyUp);
-      document.removeEventListener("copy", handleCopy);
 
       // Remove window-level events
       window.removeEventListener("mouseout", handleMouseLeave);
@@ -637,25 +516,28 @@ const LandingPage = () => {
       clearInterval(focusCheckInterval);
       clearTimeout(mouseActivityTimeout);
 
-      const existingOverlay = document.getElementById("anti-screenshot-overlay");
-      if (existingOverlay) {
-        document.body.removeChild(existingOverlay);
+      // Remove overlay
+      if (overlayRef.current && overlayRef.current.parentNode) {
+        document.body.removeChild(overlayRef.current);
       }
 
-      // Remove added style and meta elements
-      if (antiScreenshotStyle.parentNode) {
-        document.head.removeChild(antiScreenshotStyle);
-      }
-      if (metaTag.parentNode) {
-        document.head.removeChild(metaTag);
+      // Remove stylesheet
+      if (antiScreenshotStyleRef.current && antiScreenshotStyleRef.current.parentNode) {
+        document.head.removeChild(antiScreenshotStyleRef.current);
       }
 
-      document.body.classList.remove('screenshot-protection');
-      document.body.classList.remove('anti-screenshot-protection');
+      // Remove viewport meta tag
+      if (metaTagRef.current && metaTagRef.current.parentNode) {
+        document.head.removeChild(metaTagRef.current);
+      }
 
-      // Remove global debug functions
-      if (window.debugAntiScreenshot) {
-        delete window.debugAntiScreenshot;
+      // Remove body classes specific to landing page
+      document.body.classList.remove('landing-screenshot-protection');
+      document.body.classList.remove('landing-anti-screenshot');
+
+      // Remove global debug function
+      if (window.landingPageDebugAntiScreenshot) {
+        delete window.landingPageDebugAntiScreenshot;
       }
     };
   }, [setupAntiScreenshotOverlay, enableBlurOverlay, resetOverlay]);
