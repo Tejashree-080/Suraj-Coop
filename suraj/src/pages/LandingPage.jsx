@@ -542,78 +542,158 @@ const LandingPage = () => {
     };
   }, [setupAntiScreenshotOverlay, enableBlurOverlay, resetOverlay]);
 
+  // const customStyles = {
+  //   gradientBg: {
+  //     background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+  //     color: "white"
+  //   },
+  //   headerBg: {
+  //     background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+  //     backdropFilter: "blur(5px)"
+  //   },
+  //   pinkishPurple: {
+  //     color: "#D391B0"
+  //   },
+  //   loginButton: {
+  //     background: "#9F6496",
+  //     transition: "background 0.3s"
+  //   },
+  //   heroText: {
+  //     textShadow: "0px 2px 4px rgba(0,0,0,0.3)"
+  //   },
+  //   primaryButton: {
+  //     background: "#D391B0",
+  //     transition: "background 0.3s, transform 0.2s",
+  //     border: "none"
+  //   },
+  //   outlineButton: {
+  //     borderColor: "#D391B0",
+  //     color: "white",
+  //     transition: "background 0.3s, transform 0.2s"
+  //   },
+  //   sectionDark: {
+  //     background: "rgba(93, 60, 100, 0.3)"
+  //   },
+  //   announcementCard: {
+  //     background: "#7B466A",
+  //     height: "300px"
+  //   },
+  //   announcementIndicator: {
+  //     background: "rgba(255,255,255,0.3)",
+  //     transition: "background 0.3s"
+  //   },
+  //   activeIndicator: {
+  //     background: "#D391B0"
+  //   },
+  //   cardBg: {
+  //     background: "#5D3C64"
+  //   },
+  //   dateBadge: {
+  //     color: "#D391B0"
+  //   },
+  //   purpleButton: {
+  //     background: "#9F6496",
+  //     border: "none"
+  //   },
+  //   darkBg: {
+  //     background: "#0C0420"
+  //   },
+  //   borderColor: {
+  //     borderColor: "#7B466A"
+  //   },
+  //   iconWrapper: {
+  //     background: "#9F6496"
+  //   },
+  //   footerBg: {
+  //     background: "#5D3C64"
+  //   },
+  //   footerText: {
+  //     color: "#D391B0"
+  //   },
+  //   footerBorder: {
+  //     borderTop: "1px solid #7B466A"
+  //   }
+  // };
+
   const customStyles = {
-    gradientBg: {
-      background: "linear-gradient(135deg, #0C0420, #5D3C64)",
-      color: "white"
-    },
-    headerBg: {
-      background: "linear-gradient(135deg, #0C0420, #5D3C64)",
-      backdropFilter: "blur(5px)"
-    },
-    pinkishPurple: {
-      color: "#D391B0"
-    },
-    loginButton: {
-      background: "#9F6496",
-      transition: "background 0.3s"
-    },
-    heroText: {
-      textShadow: "0px 2px 4px rgba(0,0,0,0.3)"
-    },
-    primaryButton: {
-      background: "#D391B0",
-      transition: "background 0.3s, transform 0.2s",
-      border: "none"
-    },
-    outlineButton: {
-      borderColor: "#D391B0",
-      color: "white",
-      transition: "background 0.3s, transform 0.2s"
-    },
-    sectionDark: {
-      background: "rgba(93, 60, 100, 0.3)"
-    },
-    announcementCard: {
-      background: "#7B466A",
-      height: "300px"
-    },
-    announcementIndicator: {
-      background: "rgba(255,255,255,0.3)",
-      transition: "background 0.3s"
-    },
-    activeIndicator: {
-      background: "#D391B0"
-    },
-    cardBg: {
-      background: "#5D3C64"
-    },
-    dateBadge: {
-      color: "#D391B0"
-    },
-    purpleButton: {
-      background: "#9F6496",
-      border: "none"
-    },
-    darkBg: {
-      background: "#0C0420"
-    },
-    borderColor: {
-      borderColor: "#7B466A"
-    },
-    iconWrapper: {
-      background: "#9F6496"
-    },
-    footerBg: {
-      background: "#5D3C64"
-    },
-    footerText: {
-      color: "#D391B0"
-    },
-    footerBorder: {
-      borderTop: "1px solid #7B466A"
-    }
-  };
+  gradientBg: {
+    background: "#9ECCFA", // Frost Blue
+    color: "#0B1957"        // Deep Navy
+  },
+  headerBg: {
+    background: "#D1E8FF",  // Ice Blue
+    backdropFilter: "blur(5px)"
+  },
+  pinkishPurple: {
+    color: "#0B1957" // Deep Navy (as a highlight)
+  },
+  loginButton: {
+    background: "#0B1957", // Deep Navy
+    color: "#ffffff",
+    transition: "background 0.3s"
+  },
+  heroText: {
+    textShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)"
+  },
+  primaryButton: {
+    background: "#9ECCFA", // Frost Blue
+    color: "#0B1957",
+    transition: "background 0.3s, transform 0.2s",
+    border: "none"
+  },
+  outlineButton: {
+    borderColor: "#0B1957",
+    color: "#0B1957",
+    transition: "background 0.3s, transform 0.2s"
+  },
+  sectionDark: {
+    background: "#F8F3EA" // Soft Cream
+  },
+  announcementCard: {
+    background: "#0B1957", // Deep Navy
+    color: "#ffffff",
+    height: "300px"
+  },
+  announcementIndicator: {
+    background: "rgba(255, 255, 255, 0.3)",
+    transition: "background 0.3s"
+  },
+  activeIndicator: {
+    background: "#9ECCFA" // Frost Blue
+  },
+  cardBg: {
+    background: "#D1E8FF" // Ice Blue
+  },
+  dateBadge: {
+    color: "#0B1957"
+  },
+  purpleButton: {
+    background: "#F8F3EA",
+    color: "#0B1957",
+    border: "none"
+  },
+  darkBg: {
+    background: "#0B1957"
+  },
+  borderColor: {
+    borderColor: "#9ECCFA"
+  },
+  iconWrapper: {
+    background: "#9ECCFA",
+    color: "#0B1957"
+  },
+  footerBg: {
+    background: "#F8F3EA"
+  },
+  footerText: {
+    color: "#0B1957"
+  },
+  footerBorder: {
+    borderTop: "1px solid #9ECCFA"
+  }
+};
+
+
 
   return (
     <div className="min-vh-100 d-flex flex-column" style={customStyles.gradientBg}>

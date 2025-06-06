@@ -8,42 +8,83 @@ import { useNavigate } from 'react-router-dom'; // Added import
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/Home.css';
 
+// const customStyles = {
+//   gradientBg: {
+//     background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+//     color: "white"
+//   },
+//   headerBg: {
+//     background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+//     backdropFilter: "blur(5px)"
+//   },
+//   pinkishPurple: {
+//     color: "#D391B0"
+//   },
+//   loginButton: {
+//     background: "#9F6496",
+//     transition: "background 0.3s"
+//   },
+//   primaryButton: {
+//     background: "#D391B0",
+//     transition: "background 0.3s, transform 0.2s",
+//     border: "none"
+//   },
+//   outlineButton: {
+//     borderColor: "#D391B0",
+//     color: "white",
+//     transition: "background 0.3s, transform 0.2s"
+//   },
+//   cardBg: {
+//     background: "#5D3C64"
+//   },
+//   footerBg: {
+//     background: "#5D3C64"
+//   },
+//   footerText: {
+//     color: "#D391B0"
+//   }
+// };
+
 const customStyles = {
   gradientBg: {
-    background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+    background: "linear-gradient(135deg, #A0DDFF, #50D9C4, #028C8C)",
     color: "white"
   },
   headerBg: {
-    background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+    background: "linear-gradient(135deg, #FEE6EB, #F77BA5)",
     backdropFilter: "blur(5px)"
   },
   pinkishPurple: {
-    color: "#D391B0"
+    color: "#F77BA5" // Azalea
   },
   loginButton: {
-    background: "#9F6496",
+    background: "#FFD86B", // Buttercup
+    color: "#0C0420",
     transition: "background 0.3s"
   },
   primaryButton: {
-    background: "#D391B0",
+    background: "#50D9C4", // Bermuda
+    color: "white",
     transition: "background 0.3s, transform 0.2s",
     border: "none"
   },
   outlineButton: {
-    borderColor: "#D391B0",
-    color: "white",
+    borderColor: "#028C8C", // Tropical Teal
+    color: "#028C8C",
+    background: "transparent",
     transition: "background 0.3s, transform 0.2s"
   },
   cardBg: {
-    background: "#5D3C64"
+    background: "linear-gradient(135deg, #FEE6EB, #FFD86B)" // Candyfloss to Buttercup
   },
   footerBg: {
-    background: "#5D3C64"
+    background: "linear-gradient(135deg, #028C8C, #50D9C4)" // Tropical Teal to Bermuda
   },
   footerText: {
-    color: "#D391B0"
+    color: "#A0DDFF" // Ice Castle
   }
 };
+
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
