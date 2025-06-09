@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ref, onValue } from 'firebase/database';
@@ -14,51 +13,43 @@ const LandingPage = () => {
   const [galleryImages, setGalleryImages] = useState([]);
   const [activeAnnouncement, setActiveAnnouncement] = useState(0);
   const [isMouseInside, setIsMouseInside] = useState(true);
-  const isMouseInsideRef = useRef(true);
-  const antiScreenshotStyleRef = useRef(null);
-  const metaTagRef = useRef(null);
-  const overlayRef = useRef(null);
+  const isMouseInsideRef = useRef(true); // Add a ref to track mouse state across event handlers
   const navigate = useNavigate();
 
-  // Update ref when state changes
+  // Update ref when state changes to ensure latest value in event handlers
   useEffect(() => {
     isMouseInsideRef.current = isMouseInside;
   }, [isMouseInside]);
 
-  // Setup anti-screenshot overlay - modified to use refs
+  // Setup anti-screenshot overlay
   const setupAntiScreenshotOverlay = useCallback(() => {
-    // Clean up any existing overlay first to prevent duplicates
-    if (overlayRef.current && overlayRef.current.parentNode) {
-      overlayRef.current.parentNode.removeChild(overlayRef.current);
+    let overlay = document.getElementById("anti-screenshot-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "anti-screenshot-overlay";
+      overlay.style.position = "fixed";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100vw";
+      overlay.style.height = "100vh";
+      overlay.style.backdropFilter = "blur(5px)";
+      overlay.style.webkitBackdropFilter = "blur(5px)";
+      overlay.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+      overlay.style.zIndex = "2147483647"; // Maximum z-index
+      overlay.style.pointerEvents = "none";
+      overlay.style.transition = "all 0.1s ease";
+      overlay.style.opacity = "0.05";
+      document.body.appendChild(overlay);
     }
-    
-    // Create a new overlay
-    let overlay = document.createElement("div");
-    overlay.id = "anti-screenshot-overlay-landing";
-    overlay.style.position = "fixed";
-    overlay.style.top = "0";
-    overlay.style.left = "0";
-    overlay.style.width = "100vw";
-    overlay.style.height = "100vh";
-    overlay.style.backdropFilter = "blur(5px)";
-    overlay.style.webkitBackdropFilter = "blur(5px)";
-    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
-    overlay.style.zIndex = "2147483647";
-    overlay.style.pointerEvents = "none";
-    overlay.style.transition = "all 0.1s ease";
-    overlay.style.opacity = "0.05";
-    document.body.appendChild(overlay);
-    
-    // Store reference for cleanup
-    overlayRef.current = overlay;
     return overlay;
   }, []);
 
-  // Enable blur overlay - modified to use refs
+  // Enhanced blur overlay function with immediate effect
   const enableBlurOverlay = useCallback(() => {
-    console.log("Landing Page: Enabling blur overlay");
-    let overlay = document.getElementById("anti-screenshot-overlay-landing") || setupAntiScreenshotOverlay();
+    console.log("Enabling blur overlay");
+    let overlay = document.getElementById("anti-screenshot-overlay") || setupAntiScreenshotOverlay();
 
+    // Stop any ongoing transitions and apply maximum blur immediately
     overlay.style.transition = "none";
     requestAnimationFrame(() => {
       overlay.style.backdropFilter = "blur(30px)";
@@ -66,13 +57,16 @@ const LandingPage = () => {
       overlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
       overlay.style.opacity = "1";
 
+      // Re-enable transitions after applying styles
       requestAnimationFrame(() => {
         overlay.style.transition = "all 0.1s ease";
       });
     });
 
+    // Add warning text
     overlay.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:32px;text-align:center;font-weight:bold;text-shadow:2px 2px 4px #000;"></div>';
 
+    // Hide all sensitive content
     const sensitiveElements = document.querySelectorAll('.sensitive-content');
     sensitiveElements.forEach(el => {
       el.dataset.originalContent = el.textContent;
@@ -80,16 +74,17 @@ const LandingPage = () => {
     });
   }, [setupAntiScreenshotOverlay]);
 
-  // Reset overlay - modified to use refs
+  // Enhanced reset overlay function that ONLY resets when mouse is confirmed inside
   const resetOverlay = useCallback(() => {
-    const overlay = document.getElementById("anti-screenshot-overlay-landing");
+    const overlay = document.getElementById("anti-screenshot-overlay");
     if (overlay && isMouseInsideRef.current) {
-      console.log("Landing Page: Resetting overlay, mouse is inside:", isMouseInsideRef.current);
+      console.log("Resetting overlay, mouse is inside:", isMouseInsideRef.current);
       overlay.style.backdropFilter = "blur(0px)";
       overlay.style.webkitBackdropFilter = "blur(0px)";
       overlay.style.opacity = "0.1";
       overlay.innerHTML = '';
 
+      // Restore sensitive content
       const sensitiveElements = document.querySelectorAll('.sensitive-content');
       sensitiveElements.forEach(el => {
         if (el.dataset.originalContent) {
@@ -147,95 +142,96 @@ const LandingPage = () => {
     return () => clearInterval(interval);
   }, [announcements]);
 
-  // Anti-screenshot protection setup - isolated to this component
+  // Enhanced anti-screenshot protection with persistent blur until mouse return
   useEffect(() => {
-    console.log("Landing Page: Setting up anti-screenshot protection");
-    
     // Set up the initial overlay
     setupAntiScreenshotOverlay();
 
-    // Mouse tracking handlers
+    // Improved mouse tracking with proper event handling
     const handleMouseLeave = (e) => {
+      // Check if the mouse is actually leaving the window
       if (e.relatedTarget === null || !document.documentElement.contains(e.relatedTarget)) {
-        console.log("Landing Page: Mouse genuinely left window");
+        console.log("Mouse genuinely left window");
         setIsMouseInside(false);
-        isMouseInsideRef.current = false;
+        isMouseInsideRef.current = false; // Update ref immediately for event handlers
         enableBlurOverlay();
+        // No auto-reset - blur stays until mouse returns
       }
     };
 
+    // Handle mouse entering the window with improved detection
     const handleMouseEnter = (e) => {
+      // Check if mouse is coming from outside the window
       if (e.relatedTarget === null || !document.documentElement.contains(e.relatedTarget)) {
-        console.log("Landing Page: Mouse genuinely entered window");
+        console.log("Mouse genuinely entered window");
         setIsMouseInside(true);
-        isMouseInsideRef.current = true;
-        resetOverlay();
+        isMouseInsideRef.current = true; // Update ref immediately for event handlers
+        resetOverlay(); // Reset only when mouse returns
       }
     };
 
-    // Setup window-level mouse events
+    // More specific window-level mouse events for better detection
     window.addEventListener("mouseout", (e) => {
       if (e.relatedTarget === null && e.target === document.documentElement) {
-        console.log("Landing Page: Mouse left window via window.mouseout");
+        console.log("Mouse left window via window.mouseout");
         setIsMouseInside(false);
         isMouseInsideRef.current = false;
         enableBlurOverlay();
+        // No auto-reset - blur stays until mouse returns
       }
     }, { capture: true });
 
     window.addEventListener("mouseover", (e) => {
       if (e.target === document.documentElement && (e.relatedTarget === null || !document.documentElement.contains(e.relatedTarget))) {
-        console.log("Landing Page: Mouse entered window via window.mouseover");
+        console.log("Mouse entered window via window.mouseover");
         setIsMouseInside(true);
         isMouseInsideRef.current = true;
-        resetOverlay();
+        resetOverlay(); // Reset only when mouse returns
       }
     }, { capture: true });
 
-    // Mouse movement detection
+    // Add mousemove detection as a fallback
     let mouseActivityTimeout;
     const handleMouseMove = () => {
       if (!isMouseInsideRef.current) {
-        console.log("Landing Page: Mouse movement detected, mouse must be inside");
+        console.log("Mouse movement detected, mouse must be inside");
         setIsMouseInside(true);
         isMouseInsideRef.current = true;
         resetOverlay();
       }
 
+      // Reset timeout on each mouse movement
       clearTimeout(mouseActivityTimeout);
+
+      // If no mouse movement for 5 seconds, check if mouse might have left the window
       mouseActivityTimeout = setTimeout(() => {
-        if (isMouseInsideRef.current && !document.hasFocus()) {
-          console.log("Landing Page: No recent mouse activity and window not focused, assuming mouse left");
-          setIsMouseInside(false);
-          isMouseInsideRef.current = false;
-          enableBlurOverlay();
+        // Only enable blur if mouse is already set as inside (prevents false triggers)
+        if (isMouseInsideRef.current) {
+          // Check if mouse is actually outside using document.hasFocus()
+          if (!document.hasFocus()) {
+            console.log("No recent mouse activity and window not focused, assuming mouse left");
+            setIsMouseInside(false);
+            isMouseInsideRef.current = false;
+            enableBlurOverlay();
+            // No auto-reset - blur stays until mouse returns
+          }
         }
       }, 5000);
     };
 
-    // Key event handlers
+    // More aggressive capture of key events for F11 and PrintScreen
     const disableKeys = (e) => {
-      // Print Screen
-      if (e.key === "PrintScreen" || e.keyCode === 44 || e.code === "PrintScreen") {
-        console.log("Landing Page: PrintScreen detected");
-        e.preventDefault();
-        e.stopPropagation();
-        enableBlurOverlay();
-        
-        setTimeout(() => {
-          alert("Screenshots are disabled on this website.");
-          if (isMouseInsideRef.current) resetOverlay();
-        }, 100);
-        return false;
-      }
-      
-      // F11 (Full screen)
+      // Debug logging
+      console.log(`Key pressed: ${e.key}, keyCode: ${e.keyCode}, code: ${e.code}`);
+
+      // Check for F11 (Full screen)
       if (e.key === "F11" || e.keyCode === 122 || e.code === "F11") {
-        console.log("Landing Page: F11 detected - blocking fullscreen");
+        console.log("F11 detected - blocking fullscreen");
         e.preventDefault();
         e.stopPropagation();
         enableBlurOverlay();
 
+        // Exit fullscreen if somehow activated
         if (document.fullscreenElement) {
           document.exitFullscreen().catch(err => {
             console.error(`Error exiting fullscreen: ${err.message}`);
@@ -244,36 +240,59 @@ const LandingPage = () => {
 
         setTimeout(() => {
           alert("Full screen mode is disabled on this website.");
+          // Only reset if mouse is inside
           if (isMouseInsideRef.current) resetOverlay();
         }, 100);
         return false;
       }
 
-      // Function keys
+      // Check for PrintScreen
+      if (e.key === "PrintScreen" || e.keyCode === 44 || e.code === "PrintScreen") {
+        console.log("PrintScreen detected");
+        e.preventDefault();
+        e.stopPropagation();
+        enableBlurOverlay();
+
+        setTimeout(() => {
+          alert("Screenshots are disabled on this website.");
+          // Only reset if mouse is inside
+          if (isMouseInsideRef.current) resetOverlay();
+        }, 100);
+        return false;
+      }
+
+      // Prevent ALL function keys
       if ((e.key && e.key.startsWith("F") && !isNaN(parseInt(e.key.substring(1)))) ||
         (e.keyCode >= 112 && e.keyCode <= 123)) {
-        console.log(`Landing Page: Function key detected: ${e.key}`);
+        console.log(`Function key detected: ${e.key}`);
         enableBlurOverlay();
         e.preventDefault();
         e.stopPropagation();
+        // Only reset if mouse is inside
         if (isMouseInsideRef.current) resetOverlay();
         return false;
       }
 
-      // Windows key
+      // Block Windows key combinations
       if (e.key === "Meta" || e.keyCode === 91 || e.keyCode === 92) {
-        console.log("Landing Page: Windows/Meta key detected");
+        console.log("Windows/Meta key detected");
         enableBlurOverlay();
         e.preventDefault();
         e.stopPropagation();
+        // Only reset if mouse is inside
         if (isMouseInsideRef.current) resetOverlay();
         return false;
       }
 
-      // Key combinations
+      // Block Ctrl, Shift, and Alt combinations
       if (e.ctrlKey || e.shiftKey || e.altKey) {
+        // List of all potentially dangerous key combinations
         const dangerousCombos = [
+          { ctrl: true, key: "s" },        // Save
           { ctrl: true, key: "p" },        // Print
+          { ctrl: true, key: "c" },        // Copy
+          { ctrl: true, key: "x" },        // Cut
+          { ctrl: true, key: "a" },        // Select all
           { ctrl: true, shift: true, key: "i" }, // Dev tools
           { ctrl: true, shift: true, key: "j" }, // Dev tools
           { ctrl: true, shift: true, key: "c" }, // Dev tools
@@ -281,59 +300,67 @@ const LandingPage = () => {
           { ctrl: true, key: "u" },        // View source
           { alt: true, key: "PrintScreen" }, // Window screenshot
           { shift: true, key: "PrintScreen" }, // Screenshot options
+          { alt: true, key: "Tab" },       // Switch windows
         ];
 
+        // Check for any of these combinations
         for (const combo of dangerousCombos) {
           if ((combo.ctrl && e.ctrlKey) &&
             (!combo.shift || (combo.shift && e.shiftKey)) &&
             (!combo.alt || (combo.alt && e.altKey)) &&
             (e.key.toLowerCase() === combo.key.toLowerCase())) {
 
-            // Allow copy if text is selected
+            // Only allow copy if text is selected
             if (combo.key === "c" && e.ctrlKey && !e.shiftKey && !e.altKey &&
               window.getSelection().toString() !== "") {
               return; // Allow legitimate text copying
             }
 
-            console.log(`Landing Page: Dangerous key combo detected: ${JSON.stringify(combo)}`);
+            console.log(`Dangerous key combo detected: ${JSON.stringify(combo)}`);
             enableBlurOverlay();
             e.preventDefault();
             e.stopPropagation();
+            // Only reset if mouse is inside
             if (isMouseInsideRef.current) resetOverlay();
             return false;
           }
         }
       }
 
-      // Windows specific screenshot (Win+Shift+S)
+      // Windows specific screenshot combination (Win+Shift+S)
       if ((e.metaKey || e.key === "Meta") && e.shiftKey && (e.key === "s" || e.key === "S")) {
-        console.log("Landing Page: Windows snipping tool shortcut detected");
+        console.log("Windows snipping tool shortcut detected");
         enableBlurOverlay();
         e.preventDefault();
         e.stopPropagation();
+        // No auto-reset - blur stays until mouse returns
         return false;
       }
 
       // Mac specific screenshot shortcuts (Cmd+Shift+3, Cmd+Shift+4)
       if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
-        console.log("Landing Page: Mac screenshot shortcut detected");
+        console.log("Mac screenshot shortcut detected");
         enableBlurOverlay();
         e.preventDefault();
         e.stopPropagation();
+        // No auto-reset - blur stays until mouse returns
         return false;
       }
     };
 
-    // Fullscreen handler
+    // Enhanced fullscreen change detection
     function handleFullscreenChange() {
-      console.log("Landing Page: Fullscreen change detected");
-      enableBlurOverlay();
+      console.log("Fullscreen change detected");
+      enableBlurOverlay(); // Immediately blur
 
+      // Check if fullscreen is active
       if (document.fullscreenElement ||
         document.webkitFullscreenElement ||
         document.mozFullScreenElement ||
         document.msFullscreenElement) {
+        console.log("Exiting fullscreen");
 
+        // Try to exit fullscreen in all possible browser variants
         if (document.exitFullscreen) {
           document.exitFullscreen().catch(err => {
             console.error(`Error exiting fullscreen: ${err.message}`);
@@ -347,47 +374,84 @@ const LandingPage = () => {
         }
       }
 
+      // Only reset if mouse is inside
       if (isMouseInsideRef.current) resetOverlay();
     }
 
-    // Touch handlers
+    // Handle mobile-specific screenshot attempts
     const handleTouchStart = (e) => {
+      console.log(`Touch start with ${e.touches.length} touches`);
+      // Detect multi-finger gestures (common for screenshots)
       if (e.touches.length >= 2) {
-        enableBlurOverlay();
+        enableBlurOverlay(); // Make screen blurred immediately
+        // No auto-reset - blur stays until explicit mouse action
       }
     };
 
+    // Advanced touch handling for mobile screenshots
     let lastTouchEnd = 0;
     const handleTouchEnd = (e) => {
       const now = Date.now();
+      console.log(`Touch end with ${e.touches ? e.touches.length : 0} remaining touches`);
+
       if (now - lastTouchEnd <= 300) {
+        // Double tap detected - might be screenshot on some devices
+        console.log("Double tap detected");
         enableBlurOverlay();
+        // No auto-reset - blur stays until explicit mouse action
       }
+
       if ((e.touches && e.touches.length >= 2) ||
         (e.targetTouches && e.targetTouches.length >= 2)) {
+        console.log("Multi-touch end detected");
         enableBlurOverlay();
+        // No auto-reset - blur stays until explicit mouse action
       }
+
       lastTouchEnd = now;
     };
 
-    // Visibility change handler
+    // Handle power button press combination (typical for mobile screenshots)
+    let volumePressed = false;
+    const handleVolumeKeyDown = (e) => {
+      // Volume down key (common for screenshots when combined with power)
+      if (e.key === "Volume_Down" || e.keyCode === 182 || e.keyCode === 174) {
+        console.log("Volume down detected");
+        volumePressed = true;
+        enableBlurOverlay();
+        // No auto-reset - blur stays until explicit mouse action
+      }
+    };
+
+    const handleVolumeKeyUp = () => {
+      console.log("Volume key up");
+      volumePressed = false;
+      // Only reset if mouse is inside
+      if (isMouseInsideRef.current) resetOverlay();
+    };
+
+    // Handle visibility changes (app switching, which might be used for screen recording)
     const handleVisibilityChange = () => {
-      console.log(`Landing Page: Visibility changed: ${document.visibilityState}`);
+      console.log(`Visibility changed: ${document.visibilityState}`);
       if (document.visibilityState === "hidden") {
         enableBlurOverlay();
       } else if (document.visibilityState === "visible") {
+        // Only reset if mouse is inside
         if (isMouseInsideRef.current) resetOverlay();
       }
     };
 
-    // Focus/blur handlers
+    // Handle blur event (when window loses focus)
     const handleBlur = () => {
-      console.log("Landing Page: Window lost focus");
+      console.log("Window lost focus");
       enableBlurOverlay();
+      // No auto-reset - blur stays until explicit mouse action
     };
 
+    // Handle focus event (when window gains focus)
     const handleFocus = () => {
-      console.log("Landing Page: Window gained focus");
+      console.log("Window gained focus");
+      // Only reset if mouse is inside
       if (isMouseInsideRef.current) {
         resetOverlay();
       }
@@ -395,14 +459,13 @@ const LandingPage = () => {
 
     // Disable right-click menu
     const disableContextMenu = (e) => {
-      console.log("Landing Page: Context menu blocked");
+      console.log("Context menu blocked");
       e.preventDefault();
       return false;
     };
 
-    // Apply CSS protection - store ref for cleanup
+    // Apply CSS-based protection
     const antiScreenshotStyle = document.createElement('style');
-    antiScreenshotStyle.id = 'landing-page-anti-screenshot-style';
     antiScreenshotStyle.textContent = `
       @media print {
         body * {
@@ -422,42 +485,94 @@ const LandingPage = () => {
         }
       }
       
-      .landing-screenshot-protection * {
-        transition: opacity 0.01s;
+      /* Additional protection against screenshot utilities */
+      body.screenshot-protection * {
+        transition: opacity 0.01s; /* Fast transition to catch rapid state changes */
       }
       
+      /* Enhanced fullscreen protection */
       :fullscreen, ::backdrop {
         background-color: rgba(0,0,0,0.9) !important;
       }
       
-      .landing-anti-screenshot * {
+      .anti-screenshot-protection * {
         user-select: none !important;
         -webkit-user-select: none !important;
       }
     `;
     document.head.appendChild(antiScreenshotStyle);
-    antiScreenshotStyleRef.current = antiScreenshotStyle;
-    
-    document.body.classList.add('landing-screenshot-protection');
-    document.body.classList.add('landing-anti-screenshot');
+    document.body.classList.add('screenshot-protection');
+    document.body.classList.add('anti-screenshot-protection');
 
-    // Apply viewport restriction - store ref for cleanup
+    // Handle special mobile gestures
+    let startY = 0;
+    const handleTouchMove = (e) => {
+      if (e.touches && e.touches[0]) {
+        const currentY = e.touches[0].clientY;
+
+        // Check for swipe from top (might be screenshot/recording gesture on some devices)
+        if (startY < 20 && currentY > startY + 50) {
+          console.log("Top swipe detected");
+          enableBlurOverlay();
+          // No auto-reset - blur stays until explicit mouse action
+        }
+
+        // Check for multi-touch gestures
+        if (e.touches.length > 1) {
+          console.log("Multi-touch move detected");
+          enableBlurOverlay();
+          // No auto-reset - blur stays until explicit mouse action
+        }
+      }
+    };
+
+    const handleTouchStart2 = (e) => {
+      if (e.touches && e.touches[0]) {
+        startY = e.touches[0].clientY;
+      }
+    };
+
+    // Set up viewport to prevent zooming (can be used for screen capture)
     const metaTag = document.createElement("meta");
-    metaTag.id = "landing-anti-screenshot-viewport";
     metaTag.name = "viewport";
     metaTag.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
     document.head.appendChild(metaTag);
-    metaTagRef.current = metaTag;
 
-    // Set up focus check interval
+    // Screen orientation change handler
+    const handleOrientationChange = () => {
+      console.log("Orientation changed");
+      enableBlurOverlay();
+      // No auto-reset - blur stays until explicit mouse action
+    };
+
+    // Copy event handler
+    const handleCopy = () => {
+      console.log("Copy detected");
+      enableBlurOverlay();
+      // No auto-reset - blur stays until explicit mouse action
+    };
+
+    // Special debug overlay for printscreen detection
+    window.debugAntiScreenshot = {
+      printscreenDetected: () => {
+        console.log("PrintScreen detected through debug");
+        enableBlurOverlay();
+        // No auto-reset - blur stays until explicit mouse action
+      }
+    };
+
+    // Add focus/blur check interval as a redundancy for mouse tracking
     const focusCheckInterval = setInterval(() => {
       if (document.hasFocus()) {
+        // If window has focus but mouse is marked as outside, we don't auto-correct anymore
+        // We wait for actual mouse movement or mouseenter event
         if (!isMouseInsideRef.current) {
-          console.log("Landing Page: Window has focus but mouse marked as outside, waiting for explicit mouse action");
+          console.log("Window has focus but mouse marked as outside, waiting for explicit mouse action");
         }
       } else {
+        // If window doesn't have focus, mouse might be outside
         if (isMouseInsideRef.current) {
-          console.log("Landing Page: Window lost focus, mouse might be outside");
+          console.log("Window lost focus, mouse might be outside");
           setIsMouseInside(false);
           isMouseInsideRef.current = false;
           enableBlurOverlay();
@@ -470,33 +585,35 @@ const LandingPage = () => {
     document.addEventListener("keyup", disableKeys, { capture: true, passive: false });
     document.addEventListener("touchstart", handleTouchStart, { capture: true, passive: false });
     document.addEventListener("touchend", handleTouchEnd, { capture: true, passive: false });
+    document.addEventListener("touchmove", handleTouchMove, { capture: true, passive: false });
+    document.addEventListener("touchstart", handleTouchStart2, { capture: true, passive: false });
     document.addEventListener("visibilitychange", handleVisibilityChange, { capture: true });
     document.addEventListener("blur", handleBlur, { capture: true });
     document.addEventListener("focus", handleFocus, { capture: true });
     document.addEventListener("contextmenu", disableContextMenu, { capture: true, passive: false });
+
+    // Improved mouse tracking with better event handlers
     document.addEventListener("mouseleave", handleMouseLeave, { capture: true });
     document.addEventListener("mouseenter", handleMouseEnter, { capture: true });
     document.addEventListener("mousemove", handleMouseMove, { capture: true });
+
     document.addEventListener("fullscreenchange", handleFullscreenChange, { capture: true });
     document.addEventListener("webkitfullscreenchange", handleFullscreenChange, { capture: true });
     document.addEventListener("mozfullscreenchange", handleFullscreenChange, { capture: true });
     document.addEventListener("MSFullscreenChange", handleFullscreenChange, { capture: true });
-    
-    // Special debug overlay for printscreen detection
-    window.landingPageDebugAntiScreenshot = {
-      printscreenDetected: () => {
-        console.log("Landing Page: PrintScreen detected through debug");
-        enableBlurOverlay();
-      }
-    };
+    document.addEventListener("orientationchange", handleOrientationChange, { capture: true });
+    document.addEventListener("keydown", handleVolumeKeyDown, { capture: true });
+    document.addEventListener("keyup", handleVolumeKeyUp, { capture: true });
+    document.addEventListener("copy", handleCopy, { capture: true });
 
-    // CRITICAL: Comprehensive cleanup on component unmount
+    // Cleanup on component unmount
     return () => {
-      console.log("Landing Page: Cleaning up anti-screenshot protection");
       document.removeEventListener("keydown", disableKeys);
       document.removeEventListener("keyup", disableKeys);
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchstart", handleTouchStart2);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("blur", handleBlur);
       document.removeEventListener("focus", handleFocus);
@@ -508,6 +625,10 @@ const LandingPage = () => {
       document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
       document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
       document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+      document.removeEventListener("orientationchange", handleOrientationChange);
+      document.removeEventListener("keydown", handleVolumeKeyDown);
+      document.removeEventListener("keyup", handleVolumeKeyUp);
+      document.removeEventListener("copy", handleCopy);
 
       // Remove window-level events
       window.removeEventListener("mouseout", handleMouseLeave);
@@ -516,214 +637,127 @@ const LandingPage = () => {
       clearInterval(focusCheckInterval);
       clearTimeout(mouseActivityTimeout);
 
-      // Remove overlay
-      if (overlayRef.current && overlayRef.current.parentNode) {
-        document.body.removeChild(overlayRef.current);
+      const existingOverlay = document.getElementById("anti-screenshot-overlay");
+      if (existingOverlay) {
+        document.body.removeChild(existingOverlay);
       }
 
-      // Remove stylesheet
-      if (antiScreenshotStyleRef.current && antiScreenshotStyleRef.current.parentNode) {
-        document.head.removeChild(antiScreenshotStyleRef.current);
+      // Remove added style and meta elements
+      if (antiScreenshotStyle.parentNode) {
+        document.head.removeChild(antiScreenshotStyle);
+      }
+      if (metaTag.parentNode) {
+        document.head.removeChild(metaTag);
       }
 
-      // Remove viewport meta tag
-      if (metaTagRef.current && metaTagRef.current.parentNode) {
-        document.head.removeChild(metaTagRef.current);
-      }
+      document.body.classList.remove('screenshot-protection');
+      document.body.classList.remove('anti-screenshot-protection');
 
-      // Remove body classes specific to landing page
-      document.body.classList.remove('landing-screenshot-protection');
-      document.body.classList.remove('landing-anti-screenshot');
-
-      // Remove global debug function
-      if (window.landingPageDebugAntiScreenshot) {
-        delete window.landingPageDebugAntiScreenshot;
+      // Remove global debug functions
+      if (window.debugAntiScreenshot) {
+        delete window.debugAntiScreenshot;
       }
     };
   }, [setupAntiScreenshotOverlay, enableBlurOverlay, resetOverlay]);
 
-  // const customStyles = {
-  //   gradientBg: {
-  //     background: "linear-gradient(135deg, #0C0420, #5D3C64)",
-  //     color: "white"
-  //   },
-  //   headerBg: {
-  //     background: "linear-gradient(135deg, #0C0420, #5D3C64)",
-  //     backdropFilter: "blur(5px)"
-  //   },
-  //   pinkishPurple: {
-  //     color: "#D391B0"
-  //   },
-  //   loginButton: {
-  //     background: "#9F6496",
-  //     transition: "background 0.3s"
-  //   },
-  //   heroText: {
-  //     textShadow: "0px 2px 4px rgba(0,0,0,0.3)"
-  //   },
-  //   primaryButton: {
-  //     background: "#D391B0",
-  //     transition: "background 0.3s, transform 0.2s",
-  //     border: "none"
-  //   },
-  //   outlineButton: {
-  //     borderColor: "#D391B0",
-  //     color: "white",
-  //     transition: "background 0.3s, transform 0.2s"
-  //   },
-  //   sectionDark: {
-  //     background: "rgba(93, 60, 100, 0.3)"
-  //   },
-  //   announcementCard: {
-  //     background: "#7B466A",
-  //     height: "300px"
-  //   },
-  //   announcementIndicator: {
-  //     background: "rgba(255,255,255,0.3)",
-  //     transition: "background 0.3s"
-  //   },
-  //   activeIndicator: {
-  //     background: "#D391B0"
-  //   },
-  //   cardBg: {
-  //     background: "#5D3C64"
-  //   },
-  //   dateBadge: {
-  //     color: "#D391B0"
-  //   },
-  //   purpleButton: {
-  //     background: "#9F6496",
-  //     border: "none"
-  //   },
-  //   darkBg: {
-  //     background: "#0C0420"
-  //   },
-  //   borderColor: {
-  //     borderColor: "#7B466A"
-  //   },
-  //   iconWrapper: {
-  //     background: "#9F6496"
-  //   },
-  //   footerBg: {
-  //     background: "#5D3C64"
-  //   },
-  //   footerText: {
-  //     color: "#D391B0"
-  //   },
-  //   footerBorder: {
-  //     borderTop: "1px solid #7B466A"
-  //   }
-  // };
-
   const customStyles = {
-  gradientBg: {
-    background: "#9ECCFA", // Frost Blue
-    color: "#0B1957"        // Deep Navy
-  },
-  headerBg: {
-    background: "#D1E8FF",  // Ice Blue
-    backdropFilter: "blur(5px)"
-  },
-  pinkishPurple: {
-    color: "#0B1957" // Deep Navy (as a highlight)
-  },
-  loginButton: {
-    background: "#0B1957", // Deep Navy
-    color: "#ffffff",
-    transition: "background 0.3s"
-  },
-  heroText: {
-    textShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)"
-  },
-  primaryButton: {
-    background: "#9ECCFA", // Frost Blue
-    color: "#0B1957",
-    transition: "background 0.3s, transform 0.2s",
-    border: "none"
-  },
-  outlineButton: {
-    borderColor: "#0B1957",
-    color: "#0B1957",
-    transition: "background 0.3s, transform 0.2s"
-  },
-  sectionDark: {
-    background: "#F8F3EA" // Soft Cream
-  },
-  announcementCard: {
-    background: "#0B1957", // Deep Navy
-    color: "#ffffff",
-    height: "300px"
-  },
-  announcementIndicator: {
-    background: "rgba(255, 255, 255, 0.3)",
-    transition: "background 0.3s"
-  },
-  activeIndicator: {
-    background: "#9ECCFA" // Frost Blue
-  },
-  cardBg: {
-    background: "#D1E8FF" // Ice Blue
-  },
-  dateBadge: {
-    color: "#0B1957"
-  },
-  purpleButton: {
-    background: "#F8F3EA",
-    color: "#0B1957",
-    border: "none"
-  },
-  darkBg: {
-    background: "#0B1957"
-  },
-  borderColor: {
-    borderColor: "#9ECCFA"
-  },
-  iconWrapper: {
-    background: "#9ECCFA",
-    color: "#0B1957"
-  },
-  footerBg: {
-    background: "#F8F3EA"
-  },
-  footerText: {
-    color: "#0B1957"
-  },
-  footerBorder: {
-    borderTop: "1px solid #9ECCFA"
-  }
-};
-
-
+    gradientBg: {
+      background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+      color: "white"
+    },
+    headerBg: {
+      background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+      backdropFilter: "blur(5px)"
+    },
+    pinkishPurple: {
+      color: "#D391B0"
+    },
+    loginButton: {
+      background: "#9F6496",
+      transition: "background 0.3s"
+    },
+    heroText: {
+      textShadow: "0px 2px 4px rgba(0,0,0,0.3)"
+    },
+    primaryButton: {
+      background: "#D391B0",
+      transition: "background 0.3s, transform 0.2s",
+      border: "none"
+    },
+    outlineButton: {
+      borderColor: "#D391B0",
+      color: "white",
+      transition: "background 0.3s, transform 0.2s"
+    },
+    sectionDark: {
+      background: "rgba(93, 60, 100, 0.3)"
+    },
+    announcementCard: {
+      background: "#7B466A",
+      height: "300px"
+    },
+    announcementIndicator: {
+      background: "rgba(255,255,255,0.3)",
+      transition: "background 0.3s"
+    },
+    activeIndicator: {
+      background: "#D391B0"
+    },
+    cardBg: {
+      background: "#5D3C64"
+    },
+    dateBadge: {
+      color: "#D391B0"
+    },
+    purpleButton: {
+      background: "#9F6496",
+      border: "none"
+    },
+    darkBg: {
+      background: "#0C0420"
+    },
+    borderColor: {
+      borderColor: "#7B466A"
+    },
+    iconWrapper: {
+      background: "#9F6496"
+    },
+    footerBg: {
+      background: "#5D3C64"
+    },
+    footerText: {
+      color: "#D391B0"
+    },
+    footerBorder: {
+      borderTop: "1px solid #7B466A"
+    }
+  };
 
   return (
-    <div className="min-vh-100 d-flex flex-column" style={customStyles.gradientBg}>
+    <div className="home min-vh-100 d-flex flex-column">
       {/* Header */}
-      <header className="py-3 sticky-top" style={customStyles.headerBg}>
-        <div className="container">
-          <div className="d-flex justify-content-between align-items-center">
-            <div className="d-flex align-items-center gap-2">
-              <h1 className="h3 fw-bold mb-0">Suraj Co-op Housing Society</h1>
-            </div>
-            <nav className="d-none d-md-flex gap-4 align-items-center">
-              <a href="#home" className="text-decoration-none" style={customStyles.pinkishPurple}>Home</a>
-              <a href="#updates" className="text-decoration-none" style={customStyles.pinkishPurple}>Updates</a>
-              <a href="#gallery" className="text-decoration-none" style={customStyles.pinkishPurple}>Gallery</a>
-              <a href="#documents" className="text-decoration-none" style={customStyles.pinkishPurple}>Documents</a>
-              <button
-                className="btn px-4 py-2 rounded-3 fw-medium"
-                style={customStyles.purpleButton}
-                onClick={() => navigate('/Login')}
-              >
-                Admin Login
-              </button>
-            </nav>
+      <header className="header">
+        <nav className="navbar d-none d-md-flex gap-4 align-items-center">
+          <div className="logo"><h1 className="h3 fw-bold mb-0">Suraj Co-op Housing Society</h1></div>
+          <div className='d-flex gap-4 align-items-center justify-content-flex-end'>
+            <a href="#home" className="text-decoration-none" style={{ color: "white" }}>Home</a>
+            <a href="#updates" className="text-decoration-none" style={{ color: "white" }}>Updates</a>
+            <a href="#gallery" className="text-decoration-none" style={{ color: "white" }}>Gallery</a>
+            <a href="#documents" className="text-decoration-none" style={{ color: "white" }}>Documents</a>
+            <button
+              className="btn px-4 py-2 rounded-3 fw-medium"
+              style={{ backgroundColor: "#ad7a07" }}
+              onClick={() => navigate('/Login')}
+            >
+              Sign In
+            </button>
           </div>
-        </div>
+        </nav>
       </header>
 
       {/* Hero Section */}
       <section
-        id="home"
+        id="hero"
         className="py-5 py-md-6 px-3 text-center position-relative"
         style={{
           animation: "fadeIn 1s ease-in-out",
@@ -748,27 +782,20 @@ const LandingPage = () => {
         ></div>
 
         {/* Content section */}
-        <div className="container position-relative z-index-2 align-items-center">
+        <div className="hero-content position-relative z-index-2 align-items-center">
           <h2
             className="display-4 fw-bold mb-4"
-            style={{ textShadow: "0px 2px 4px rgba(0,0,0,0.3)" }}
+            style={{ color: "white", textShadow: "0px 2px 4px rgba(0,0,0,0.3)" }}
           >
             Building Your Future Home
           </h2>
-          <p className="fs-5 mx-auto mb-5" style={{ maxWidth: "700px" }}>
+          <p className="fs-5 mx-auto mb-5" style={{ color: "white", maxWidth: "700px" }}>
             Stay informed about the latest developments in your future home. Track construction progress,
             access important documents, and join community meetings.
           </p>
-          <div className="d-flex gap-3 justify-content-center flex-wrap">
+          <div className="contact d-flex gap-3 justify-content-center flex-wrap">
             <a href="tel:987654321">
-              <button
-                className="btn btn-lg px-4 py-2 rounded-3 fw-medium border-2"
-                style={{
-                  borderColor: "#D391B0",
-                  color: "white",
-                  transition: "background 0.3s, transform 0.2s"
-                }}
-              >
+              <button>
                 Contact Us
               </button>
             </a>
@@ -776,13 +803,24 @@ const LandingPage = () => {
         </div>
       </section>
 
+      <section className="features">
+        <div className="left">
+          <h2>Why Choose Us For Projects!</h2>
+          <p>Magnam voluptatem doloremque. Eveniet ratione impedit labore magni?</p>
+          <button>View All Services</button>
+        </div>
+        {/* <div className="right">
+        </div> */}
+      </section>
+
       {/* Announcements Carousel */}
-      <section id="updates" className="py-5" style={customStyles.sectionDark}>
+      <section id="updates" className="py-5" style={{ backgroundColor: "#93a7b9" }}>
         <div className="container py-3">
           <h2 className="h2 fw-bold mb-5 text-center">Latest Announcements</h2>
           <div className="position-relative overflow-hidden rounded-4 shadow mx-auto"
             style={{
-              background: customStyles.announcementCard.background,
+              backgroundColor: "#1f2c3d",
+              color: "white",
               minHeight: "300px",
               maxWidth: "800px"
             }}>
@@ -800,7 +838,7 @@ const LandingPage = () => {
                       padding: "2.5rem"
                     }}
                   >
-                    <div className="badge rounded-pill mb-3 px-3 py-2" style={customStyles.darkBg}>
+                    <div className="badge rounded-pill mb-3 px-3 py-2" style={{ backgroundColor: "#Ad7a08", color: "white"}}>
                       {announcement.date}
                     </div>
                     <h3 className="fs-3 fw-bold mb-3 text-center">{announcement.title}</h3>
@@ -825,8 +863,8 @@ const LandingPage = () => {
                         width: "12px",
                         height: "12px",
                         cursor: "pointer",
-                        ...customStyles.announcementIndicator,
-                        ...(index === activeAnnouncement ? customStyles.activeIndicator : {})
+                        backgroundColor: customStyles.announcementIndicator.background,
+                        ...(index === activeAnnouncement ? customStyles.activeIndicator : { backgroundColor: customStyles.announcementIndicator.background})
                       }}
                       onClick={() => setActiveAnnouncement(index)}
                       aria-label={`Announcement ${index + 1}`}
@@ -892,7 +930,7 @@ const LandingPage = () => {
             <div className="row g-4 justify-content-center color-white">
               {galleryImages.map((image, index) => (
                 <div key={index} className="col-md-4 col-sm-6">
-                  <div className="card h-100 border-0 shadow rounded-4 overflow-hidden" style={customStyles.cardBg}>
+                  <div className="card h-100 border-0 shadow rounded-4 overflow-hidden" style={{ backgroundColor: "#0d1a26" }}>
                     <div style={{ height: "200px", overflow: "hidden" }}>
                       <img
                         src={image.url}
@@ -906,7 +944,7 @@ const LandingPage = () => {
                     <div className="card-body color-white">
                       <h3 className="fw-bold fs-5 mb-1" style={{ color: "white" }}>{image.name}</h3>
                       <p className="small" style={{ color: "white" }}>{image.description}</p>
-                      <p className="small" style={customStyles.dateBadge}>{image.uploadDate}</p>
+                      <p className="small" style={{ color: "#f1bf2a"}}>{image.uploadDate}</p>
                     </div>
                   </div>
                 </div>
@@ -946,13 +984,13 @@ const LandingPage = () => {
                       </div>
                     </div>
                     <a
-                      href={doc.url}
+                      href={`/view?fileUrl=${encodeURIComponent(doc.url)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-sm rounded-3 px-3"
                       style={customStyles.primaryButton}
                     >
-                      Download
+                      View
                     </a>
                   </div>
                 ))
