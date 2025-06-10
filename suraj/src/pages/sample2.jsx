@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import step1 from '../assets/1.png';
 import step2 from '../assets/2.png';
 import step3 from '../assets/3.png';
@@ -34,6 +34,14 @@ const sections = [
 const ConstructionStepsSection = () => {
   const [activeSection, setActiveSection] = useState(0);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveSection((prev) => (prev + 1) % sections.length);
+    }, 1000); // Change every 0.5 seconds
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []);
+
   return (
     <div className="min-vh-70" style={{ backgroundColor: "#1f2c3d", color: "white" }}>
       {/* Header Section */}
@@ -51,14 +59,14 @@ const ConstructionStepsSection = () => {
         {/* Left Content Panel */}
         <div className="flex-grow-1">
           <div className="p-5">
-            <div className="container d-flex flex-column flex-lg-row align-items-center">
+            <div className="container d-flex flex-column flex-lg-row align-items-center justify-content-space-around;">
               {/* Image Section */}
               <div className="mb-4 mb-lg-0">
                 <img
                   src={sections[activeSection].img}
                   alt={sections[activeSection].title}
                   className="img-fluid rounded"
-                  style={{ maxWidth: '300px' }}
+                  style={{ maxWidth: '400px' }} // Increased image size
                 />
               </div>
 
@@ -80,7 +88,7 @@ const ConstructionStepsSection = () => {
               {sections.map((_, index) => (
                 <button
                   key={index}
-                  className={`btn btn-sm rounded-circle ${activeSection === index ? 'btn-warning' : 'btn-secondary'}`}
+                  className={`btn btn-sm rounded-circle ${activeSection === index ? 'btn-warning animate-dot' : 'btn-secondary'}`}
                   style={{ width: '20px', height: '20px' }}
                   onClick={() => setActiveSection(index)}
                 ></button>
@@ -94,7 +102,7 @@ const ConstructionStepsSection = () => {
           {sections.map((section, index) => (
             <button
               key={index}
-              className={`btn w-100 text-start py-3  ${activeSection === index ? 'border-start border-warning' : ''}`}
+              className={`btn w-100 text-start py-3 animate-nav ${activeSection === index ? 'border-start border-warning' : ''}`}
               style={{ backgroundColor: "#1f2c3d", color: "white" }}
               onClick={() => setActiveSection(index)}
             >
@@ -103,7 +111,26 @@ const ConstructionStepsSection = () => {
             </button>
           ))}
         </div>
-      </div>
+
+      {/* CSS for animations */}
+      <style jsx>{`
+        .animate-dot {
+          transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+        }
+        .animate-dot:hover {
+          transform: scale(1.3);
+          background-color: #ffc107;
+        }
+
+        .animate-nav {
+          transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+        }
+        .animate-nav:hover {
+          transform: scale(1.05);
+          background-color: #ffc107;
+        }
+      `}</style>
+    </div>
     </div>
   );
 };
