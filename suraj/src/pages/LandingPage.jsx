@@ -6,6 +6,14 @@ import database from '../firebaseConfig';
 import { storage } from '../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import building from '../assets/building1.jpg';
+import lego from '../assets/lego.mp4';
+import lego1 from '../assets/buildinglego.mp4';
+import step1 from '../assets/1.png';
+import step2 from '../assets/2.png';
+import step3 from '../assets/3.png';
+import step4 from '../assets/4.png';
+
+import ConstructionStepsSection from './sample2';
 
 const LandingPage = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -733,6 +741,72 @@ const LandingPage = () => {
     }
   };
 
+  const sections = [
+    { img: step1, title: "Foundation & Rod Work", content: "Guarantees consistently high quality without overpayments." },
+    { img: step2, title: "Cement Layering", content: "Products from this line are made for construction and repair of cottages." },
+    { img: step3, title: "Painting the Structure", content: "Ensures durability and aesthetic appeal for structures." },
+    { img: step4, title: "Final Look", content: "Provides the final touch for a polished and professional appearance." },
+  ];
+
+  const SectionWithTabs = () => {
+    const [activeSection, setActiveSection] = useState(0);
+
+    return (
+      <section className="py-5 px-3 text-center" style={{ backgroundColor: "#f8f9fa" }}>
+        <div className="container d-flex flex-column align-items-center">
+          <h2 className="text-uppercase fw-bold mb-4" style={{ fontSize: "2rem" }}>Our Products</h2>
+          <div className="row w-100">
+            {/* Left Content */}
+            <div className="col-md-6 d-flex flex-column justify-content-center align-items-start">
+              <h3 className="text-danger fw-bold mb-3" style={{ fontSize: "2.5rem" }}>
+                {sections[activeSection].title}
+              </h3>
+              <p className="text-muted mb-4" style={{ fontSize: "1.2rem" }}>
+                {sections[activeSection].content}
+              </p>
+              <button
+                className="btn btn-danger rounded-pill px-4 py-2"
+                style={{ fontSize: "1rem" }}
+              >
+                Learn More
+              </button>
+            </div>
+
+            {/* Right Content */}
+            <div className="col-md-6 d-flex justify-content-center align-items-center">
+              <img
+                src={sections[activeSection].img}
+                alt={sections[activeSection].title}
+                className="img-fluid"
+                style={{ maxWidth: "300px", height: "auto" }}
+              />
+            </div>
+          </div>
+
+          {/* Vertical Tabs */}
+          <div className="d-flex flex-column align-items-end mt-4" style={{ width: "100%" }}>
+            {sections.map((section, index) => (
+              <button
+                key={index}
+                className={`btn text-uppercase fw-bold py-2 px-3 mb-2 ${activeSection === index ? "text-danger" : "text-dark"}`}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  fontSize: "1.2rem",
+                  textAlign: "right",
+                  cursor: "pointer",
+                }}
+                onClick={() => setActiveSection(index)}
+              >
+                {section.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  };
+
   return (
     <div className="home min-vh-100 d-flex flex-column">
       {/* Header */}
@@ -744,13 +818,13 @@ const LandingPage = () => {
             <a href="#updates" className="text-decoration-none" style={{ color: "white" }}>Updates</a>
             <a href="#gallery" className="text-decoration-none" style={{ color: "white" }}>Gallery</a>
             <a href="#documents" className="text-decoration-none" style={{ color: "white" }}>Documents</a>
-            <button
+            {/* <button
               className="btn px-4 py-2 rounded-3 fw-medium"
               style={{ backgroundColor: "#ad7a07" }}
               onClick={() => navigate('/Login')}
             >
               Sign In
-            </button>
+            </button> */}
           </div>
         </nav>
       </header>
@@ -760,36 +834,46 @@ const LandingPage = () => {
         id="hero"
         className="py-5 py-md-6 px-3 text-center position-relative"
         style={{
-          animation: "fadeIn 1s ease-in-out",
-          backgroundImage: `url(${building})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          opacity: 0.9,
-          minHeight: "70vh",
+          position: "relative",
+          height: "80vh",
+          overflow: "hidden",
         }}
       >
-        {/* Black shadow overlay */}
-        <div
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
           style={{
             position: "absolute",
             top: 0,
             left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
             zIndex: 0,
           }}
-        ></div>
+        >
+          <source src={lego1} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
 
-        {/* Content section */}
-        <div className="hero-content position-relative z-index-2 align-items-center">
+        {/* Content Section */}
+        <div
+          className="hero-content position-relative z-index-2 align-items-center"
+          style={{
+            position: "relative",
+            zIndex: 1,
+            color: "white",
+          }}
+        >
           <h2
             className="display-4 fw-bold mb-4"
-            style={{ color: "white", textShadow: "0px 2px 4px rgba(0,0,0,0.3)" }}
+            style={{ textShadow: "0px 2px 4px rgba(0,0,0,0.3)" }}
           >
             Building Your Future Home
           </h2>
-          <p className="fs-5 mx-auto mb-5" style={{ color: "white", maxWidth: "700px" }}>
+          <p className="fs-5 mx-auto mb-5" style={{ maxWidth: "700px" }}>
             Stay informed about the latest developments in your future home. Track construction progress,
             access important documents, and join community meetings.
           </p>
@@ -802,17 +886,11 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      
+      {/* Section With Tabs */}
+      <ConstructionStepsSection />
 
-      <section className="features">
-        <div className="left">
-          <h2>Why Choose Us For Projects!</h2>
-          <p>Magnam voluptatem doloremque. Eveniet ratione impedit labore magni?</p>
-          <button>View All Services</button>
-        </div>
-        {/* <div className="right">
-        </div> */}
-      </section>
-
+      {/* Other Sections */}
       {/* Announcements Carousel */}
       <section id="updates" className="py-5" style={{ backgroundColor: "#93a7b9" }}>
         <div className="container py-3">
@@ -838,7 +916,7 @@ const LandingPage = () => {
                       padding: "2.5rem"
                     }}
                   >
-                    <div className="badge rounded-pill mb-3 px-3 py-2" style={{ backgroundColor: "#Ad7a08", color: "white"}}>
+                    <div className="badge rounded-pill mb-3 px-3 py-2" style={{ backgroundColor: "#ffc107", color: "white" }}>
                       {announcement.date}
                     </div>
                     <h3 className="fs-3 fw-bold mb-3 text-center">{announcement.title}</h3>
@@ -864,7 +942,7 @@ const LandingPage = () => {
                         height: "12px",
                         cursor: "pointer",
                         backgroundColor: customStyles.announcementIndicator.background,
-                        ...(index === activeAnnouncement ? customStyles.activeIndicator : { backgroundColor: customStyles.announcementIndicator.background})
+                        ...(index === activeAnnouncement ? customStyles.activeIndicator : { backgroundColor: customStyles.announcementIndicator.background })
                       }}
                       onClick={() => setActiveAnnouncement(index)}
                       aria-label={`Announcement ${index + 1}`}
@@ -944,7 +1022,7 @@ const LandingPage = () => {
                     <div className="card-body color-white">
                       <h3 className="fw-bold fs-5 mb-1" style={{ color: "white" }}>{image.name}</h3>
                       <p className="small" style={{ color: "white" }}>{image.description}</p>
-                      <p className="small" style={{ color: "#f1bf2a"}}>{image.uploadDate}</p>
+                      <p className="small" style={{ color: "#f1bf2a" }}>{image.uploadDate}</p>
                     </div>
                   </div>
                 </div>
