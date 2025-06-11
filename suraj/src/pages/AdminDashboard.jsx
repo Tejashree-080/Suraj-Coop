@@ -10,40 +10,44 @@ import '../styles/Home.css';
 
 const customStyles = {
   gradientBg: {
-    background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+    background: "linear-gradient(135deg, #1f2c3d, #3c4a5f)",
     color: "white"
   },
   headerBg: {
-    background: "linear-gradient(135deg, #0C0420, #5D3C64)",
+    background: "linear-gradient(135deg, #1f2c3d, #3c4a5f)",
     backdropFilter: "blur(5px)"
   },
   pinkishPurple: {
     color: "#ffffff"
   },
   loginButton: {
-    background: "#9F6496",
+    background: "#f1bf2a",
     transition: "background 0.3s"
   },
   primaryButton: {
-    background: "#D391B0",
+    background: "#f1bf2a",
     transition: "background 0.3s, transform 0.2s",
     border: "none"
   },
   outlineButton: {
-    borderColor: "#D391B0",
+    borderColor: "#f1bf2a",
     color: "white",
     transition: "background 0.3s, transform 0.2s"
   },
   cardBg: {
-    background: "#5D3C64"
+    background: "#f1bf2a"
   },
   footerBg: {
-    background: "#5D3C64"
+    background: "#f1bf2a"
   },
   footerText: {
-    color: "#D391B0"
+    color: "#f1bf2a"
   }
 };
+
+
+
+
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');

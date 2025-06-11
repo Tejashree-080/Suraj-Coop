@@ -1033,7 +1033,7 @@ const LandingPage = () => {
       </section>
 
       {/* Documents Section */}
-      <section id="documents" className="py-5" style={{backgroundColor:"#93a7b9"}}>
+      {/* <section id="documents" className="py-5" style={{backgroundColor:"#93a7b9"}}>
         <div className="container py-3">
           <h2 className="h2 fw-bold mb-5 text-center">Important Documents</h2>
           <div className="mx-auto rounded-4 overflow-hidden shadow" style={{
@@ -1078,10 +1078,150 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
+
+
+
+      {/* <section id="documents" className="py-5" style={{ backgroundColor: "#0d1a26" }}>
+  <div className="container py-3">
+    <h2 className="h2 fw-bold mb-5 text-center" style={{ color: "white" }}>Important Documents</h2>
+    <div
+      className="mx-auto rounded-4 overflow-hidden shadow"
+      style={{
+        backgroundColor: "#1a2e3b", // slightly lighter dark
+        maxWidth: "800px",
+        color: "white"
+      }}
+    >
+      <div className="p-4">
+        {documents.length > 0 ? (
+          documents.map((doc, index) => (
+            <div
+              key={index}
+              className="d-flex align-items-center justify-content-between py-3 px-3 border-bottom rounded-3 mb-2"
+              style={{ borderColor: "#334b5e", borderWidth: "1px", borderStyle: "solid" }}
+            >
+              <div className="d-flex align-items-center">
+                <div
+                  className="d-flex align-items-center justify-content-center rounded-3 me-3"
+                  style={{
+                    backgroundColor: "#11222f",
+                    width: "48px",
+                    height: "48px",
+                    color: "white"
+                  }}
+                >
+                  {doc.type}
+                </div>
+                <div>
+                  <h4 className="fw-medium mb-0 text-white">{doc.name}</h4>
+                  <p className="small mb-0" style={{ color: "#f1bf2a" }}>{doc.uploadDate}</p>
+                </div>
+              </div>
+              <a
+                href={`/view?fileUrl=${encodeURIComponent(doc.url)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-sm rounded-3 px-3"
+                style={{
+                  backgroundColor: "#f1bf2a",
+                  color: "#0d1a26",
+                  fontWeight: "600"
+                }}
+              >
+                View
+              </a>
+            </div>
+          ))
+        ) : (
+          <p className="text-center py-4 text-white">No documents available at the moment.</p>
+        )}
+      </div>
+    </div>
+  </div>
+</section> */}
+
+
+<section id="documents" className="py-5" style={{ backgroundColor: "#93a7b9" }}>
+  <div className="container py-3">
+    <h2 className="h2 fw-bold mb-5 text-center" style={{ color: "white" }}>Important Documents</h2>
+    <div
+      className="mx-auto rounded-4 overflow-hidden shadow"
+      style={{
+        backgroundColor: "#243646", // consistent with dark announcement card
+        maxWidth: "800px",
+        color: "white"
+      }}
+    >
+      <div className="p-4">
+        {documents.length > 0 ? (
+          documents.map((doc, index) => (
+            <div
+              key={index}
+              className="d-flex align-items-center justify-content-between py-3 px-3 border-bottom rounded-3 mb-2"
+              style={{
+                borderColor: "#334b5e",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                backgroundColor: "#1f2c3d"
+              }}
+            >
+              <div className="d-flex align-items-center">
+                <div
+                  className="d-flex align-items-center justify-content-center rounded-3 me-3"
+                  style={{
+                    backgroundColor: "#11222f",
+                    width: "48px",
+                    height: "48px",
+                    color: "white"
+                  }}
+                >
+                  {doc.type}
+                </div>
+                <div>
+                  <h4 className="fw-medium mb-0 text-white">{doc.name}</h4>
+                  <p className="small mb-0" style={{ color: "#f1bf2a" }}>{doc.uploadDate}</p>
+                </div>
+              </div>
+              <a
+                href={`/view?fileUrl=${encodeURIComponent(doc.url)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-sm rounded-3 px-3"
+                style={{
+                  backgroundColor: "#f1bf2a",
+                  color: "#1f2c3d",
+                  fontWeight: "600",
+                  transition: "all 0.3s"
+                }}
+                onMouseOver={e => {
+                  e.target.style.backgroundColor = "#e6ae1f";
+                  e.target.style.transform = "scale(1.05)";
+                }}
+                onMouseOut={e => {
+                  e.target.style.backgroundColor = "#f1bf2a";
+                  e.target.style.transform = "scale(1)";
+                }}
+              >
+                View
+              </a>
+            </div>
+          ))
+        ) : (
+          <p className="text-center py-4" style={{ color: "#ccc" }}>
+            No documents available at the moment.
+          </p>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
 
       {/* Admin Panel Quick Access */}
-      <section className="py-4" style={customStyles.darkBg}>
+      {/* <section className="py-4" style={customStyles.darkBg}>
         <div className="container text-center py-2">
           <h2 className="h3 fw-bold mb-3">Admin Access</h2>
           <p className="mb-4">For property managers and society administrators</p>
@@ -1093,10 +1233,43 @@ const LandingPage = () => {
             Admin Login
           </button>
         </div>
-      </section>
+      </section> */}
+
+
+    
+
+
+  <section className="py-4" style={{ backgroundColor: "#93a7b9" }}>
+  <div className="container text-center py-2">
+    <h2 className="h3 fw-bold mb-3" style={{ color: "white" }}>Admin Access</h2>
+    <p className="mb-4" style={{ color: "#cccccc" }}>For property managers and society administrators</p>
+    <button
+      className="btn px-4 py-2 rounded-3 fw-medium"
+      style={{
+        backgroundColor: "#f1bf2a",
+        color: "#1f2c3d",
+        fontWeight: "600",
+        transition: "all 0.3s"
+      }}
+      onClick={() => navigate('/Login')}
+      onMouseOver={e => {
+        e.target.style.backgroundColor = "#e6ae1f";
+        e.target.style.transform = "scale(1.05)";
+      }}
+      onMouseOut={e => {
+        e.target.style.backgroundColor = "#f1bf2a";
+        e.target.style.transform = "scale(1)";
+      }}
+    >
+      Admin Login
+    </button>
+  </div>
+</section>
+
+
 
       {/* Footer */}
-      <footer className="py-4 mt-auto" style={customStyles.footerBg}>
+      {/* <footer className="py-4 mt-auto" style={customStyles.footerBg}>
         <div className="container">
           <div className="row align-items-center">
             <div className="col-md-4 mb-4 mb-md-0">
@@ -1122,7 +1295,44 @@ const LandingPage = () => {
             &copy; 2025 Skyline Towers. All rights reserved.
           </div>
         </div>
-      </footer>
+      </footer> */}
+
+      <footer className="py-4 mt-auto" style={{ backgroundColor: "#0d1a26", color: "white" }}>
+  <div className="container">
+    <div className="row align-items-center">
+      <div className="col-md-4 mb-4 mb-md-0">
+        <h3 className="h5 fw-bold mb-2" style={{ color: "white" }}>Suraj Co-op Housing Society</h3>
+        <p className="small mb-0" style={{ color: "#cccccc" }}>
+          A premium residential project by Horizon Developers
+        </p>
+      </div>
+      <div className="col-md-8">
+        <div className="row">
+          <div className="col-md-6 mb-3 mb-md-0">
+            <h4 className="h6 fw-medium mb-2" style={{ color: "white" }}>Contact</h4>
+            <p className="small mb-0" style={{ color: "#cccccc" }}>support@skylinetowers.com</p>
+            <p className="small mb-0" style={{ color: "#cccccc" }}>(555) 123-4567</p>
+          </div>
+          <div className="col-md-6">
+            <h4 className="h6 fw-medium mb-2" style={{ color: "white" }}>Address</h4>
+            <p className="small mb-0" style={{ color: "#cccccc" }}>123 Construction Ave</p>
+            <p className="small mb-0" style={{ color: "#cccccc" }}>Metropolis, MP 12345</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="text-center small mt-4 pt-4"
+      style={{
+        borderTop: "1px solid #334b5e",
+        color: "#f1bf2a"
+      }}
+    >
+      &copy; 2025 Skyline Towers. All rights reserved.
+    </div>
+  </div>
+</footer>
+
 
       {/* CSS for animations */}
       <style jsx>{`
