@@ -955,7 +955,7 @@ const LandingPage = () => {
       </section>
 
       {/* Documents Section */}
-      <section id="documents" className="py-5" style={customStyles.sectionDark}>
+      <section id="documents" className="py-5" style={{backgroundColor:"#93a7b9"}}>
         <div className="container py-3">
           <h2 className="h2 fw-bold mb-5 text-center">Important Documents</h2>
           <div className="mx-auto rounded-4 overflow-hidden shadow" style={{
