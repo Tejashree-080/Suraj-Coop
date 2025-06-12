@@ -98,7 +98,7 @@ const FileViewerPage = () => {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header style={{ padding: '1rem', backgroundColor: '#5D3C64', color: 'white', textAlign: 'center' }}>
+      <header style={{ padding: '1rem', backgroundColor: '#93a7b9', color: '#1f2c3d', textAlign: 'center' }}>
         <h1>File Viewer</h1>
       </header>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8f9fa' }}>

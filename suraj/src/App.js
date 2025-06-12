@@ -4,8 +4,6 @@ import firebase from './firebaseConfig'; // Import the initialized Firebase inst
 import './App.css';
 
 import LandingPage from './pages/LandingPage';
-import Sample from './pages/sample1';
-import Animation from './pages/sample2';
 import Login from './pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard';
 import PageNotFound from './pages/PageNotFound';
@@ -166,8 +164,6 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/1" element={<Sample />} />
-        <Route path="/2" element={<Animation />} />
         <Route path="/Login" element={<Login setLoggedInUser={setLoggedInUser} />} />
         <Route
           path="/AdminDashboard/"

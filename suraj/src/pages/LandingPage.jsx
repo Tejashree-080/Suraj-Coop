@@ -5,13 +5,11 @@ import { ref as storageRef, getDownloadURL } from 'firebase/storage';
 import database from '../firebaseConfig';
 import { storage } from '../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
-import building from '../assets/building1.jpg';
-import lego from '../assets/lego.mp4';
 import lego1 from '../assets/buildinglego.mp4';
-import step1 from '../assets/1.png';
-import step2 from '../assets/2.png';
-import step3 from '../assets/3.png';
-import step4 from '../assets/4.png';
+// import step1 from '../assets/1.png';
+// import step2 from '../assets/2.png';
+// import step3 from '../assets/3.png';
+// import step4 from '../assets/4.png';
 
 import ConstructionStepsSection from './sample2';
 
@@ -669,143 +667,80 @@ const LandingPage = () => {
   }, [setupAntiScreenshotOverlay, enableBlurOverlay, resetOverlay]);
 
   const customStyles = {
-    gradientBg: {
-      background: "linear-gradient(135deg, #0C0420, #5D3C64)",
-      color: "white"
-    },
-    headerBg: {
-      background: "linear-gradient(135deg, #0C0420, #5D3C64)",
-      backdropFilter: "blur(5px)"
-    },
-    pinkishPurple: {
-      color: "#D391B0"
-    },
-    loginButton: {
-      background: "#9F6496",
-      transition: "background 0.3s"
-    },
-    heroText: {
-      textShadow: "0px 2px 4px rgba(0,0,0,0.3)"
-    },
-    primaryButton: {
-      background: "#D391B0",
-      transition: "background 0.3s, transform 0.2s",
-      border: "none"
-    },
-    outlineButton: {
-      borderColor: "#D391B0",
-      color: "white",
-      transition: "background 0.3s, transform 0.2s"
-    },
-    sectionDark: {
-      background: "rgba(93, 60, 100, 0.3)"
-    },
-    announcementCard: {
-      background: "#7B466A",
-      height: "300px"
-    },
     announcementIndicator: {
       background: "rgba(255,255,255,0.3)",
       transition: "background 0.3s"
     },
-    activeIndicator: {
-      background: "#D391B0"
-    },
-    cardBg: {
-      background: "#5D3C64"
-    },
-    dateBadge: {
-      color: "#D391B0"
-    },
-    purpleButton: {
-      background: "#9F6496",
-      border: "none"
-    },
-    darkBg: {
-      background: "#0C0420"
-    },
-    borderColor: {
-      borderColor: "#7B466A"
-    },
     iconWrapper: {
       background: "#9F6496"
     },
-    footerBg: {
-      background: "#5D3C64"
-    },
-    footerText: {
-      color: "#D391B0"
-    },
-    footerBorder: {
-      borderTop: "1px solid #7B466A"
-    }
   };
 
-  const sections = [
-    { img: step1, title: "Foundation & Rod Work", content: "Guarantees consistently high quality without overpayments." },
-    { img: step2, title: "Cement Layering", content: "Products from this line are made for construction and repair of cottages." },
-    { img: step3, title: "Painting the Structure", content: "Ensures durability and aesthetic appeal for structures." },
-    { img: step4, title: "Final Look", content: "Provides the final touch for a polished and professional appearance." },
-  ];
+  // const sections = [
+  //   { img: step1, title: "Foundation & Rod Work", content: "Guarantees consistently high quality without overpayments." },
+  //   { img: step2, title: "Cement Layering", content: "Products from this line are made for construction and repair of cottages." },
+  //   { img: step3, title: "Painting the Structure", content: "Ensures durability and aesthetic appeal for structures." },
+  //   { img: step4, title: "Final Look", content: "Provides the final touch for a polished and professional appearance." },
+  // ];
 
-  const SectionWithTabs = () => {
-    const [activeSection, setActiveSection] = useState(0);
+  // const SectionWithTabs = () => {
+  //   const [activeSection, setActiveSection] = useState(0);
 
-    return (
-      <section className="py-5 px-3 text-center" style={{ backgroundColor: "#f8f9fa" }}>
-        <div className="container d-flex flex-column align-items-center">
-          <h2 className="text-uppercase fw-bold mb-4" style={{ fontSize: "2rem" }}>Our Products</h2>
-          <div className="row w-100">
-            {/* Left Content */}
-            <div className="col-md-6 d-flex flex-column justify-content-center align-items-start">
-              <h3 className="text-danger fw-bold mb-3" style={{ fontSize: "2.5rem" }}>
-                {sections[activeSection].title}
-              </h3>
-              <p className="text-muted mb-4" style={{ fontSize: "1.2rem" }}>
-                {sections[activeSection].content}
-              </p>
-              <button
-                className="btn btn-danger rounded-pill px-4 py-2"
-                style={{ fontSize: "1rem" }}
-              >
-                Learn More
-              </button>
-            </div>
+  //   return (
+  //     <section className="py-5 px-3 text-center" style={{ backgroundColor: "#f8f9fa" }}>
+  //       <div className="container d-flex flex-column align-items-center">
+  //         <h2 className="text-uppercase fw-bold mb-4" style={{ fontSize: "2rem" }}>Our Products</h2>
+  //         <div className="row w-100">
+  //           {/* Left Content */}
+  //           <div className="col-md-6 d-flex flex-column justify-content-center align-items-start">
+  //             <h3 className="text-danger fw-bold mb-3" style={{ fontSize: "2.5rem" }}>
+  //               {sections[activeSection].title}
+  //             </h3>
+  //             <p className="text-muted mb-4" style={{ fontSize: "1.2rem" }}>
+  //               {sections[activeSection].content}
+  //             </p>
+  //             <button
+  //               className="btn btn-danger rounded-pill px-4 py-2"
+  //               style={{ fontSize: "1rem" }}
+  //             >
+  //               Learn More
+  //             </button>
+  //           </div>
 
-            {/* Right Content */}
-            <div className="col-md-6 d-flex justify-content-center align-items-center">
-              <img
-                src={sections[activeSection].img}
-                alt={sections[activeSection].title}
-                className="img-fluid"
-                style={{ maxWidth: "300px", height: "auto" }}
-              />
-            </div>
-          </div>
+  //           {/* Right Content */}
+  //           <div className="col-md-6 d-flex justify-content-center align-items-center">
+  //             <img
+  //               src={sections[activeSection].img}
+  //               alt={sections[activeSection].title}
+  //               className="img-fluid"
+  //               style={{ maxWidth: "300px", height: "auto" }}
+  //             />
+  //           </div>
+  //         </div>
 
-          {/* Vertical Tabs */}
-          <div className="d-flex flex-column align-items-end mt-4" style={{ width: "100%" }}>
-            {sections.map((section, index) => (
-              <button
-                key={index}
-                className={`btn text-uppercase fw-bold py-2 px-3 mb-2 ${activeSection === index ? "text-danger" : "text-dark"}`}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  fontSize: "1.2rem",
-                  textAlign: "right",
-                  cursor: "pointer",
-                }}
-                onClick={() => setActiveSection(index)}
-              >
-                {section.title}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  };
+  //         {/* Vertical Tabs */}
+  //         <div className="d-flex flex-column align-items-end mt-4" style={{ width: "100%" }}>
+  //           {sections.map((section, index) => (
+  //             <button
+  //               key={index}
+  //               className={`btn text-uppercase fw-bold py-2 px-3 mb-2 ${activeSection === index ? "text-danger" : "text-dark"}`}
+  //               style={{
+  //                 border: "none",
+  //                 background: "transparent",
+  //                 fontSize: "1.2rem",
+  //                 textAlign: "right",
+  //                 cursor: "pointer",
+  //               }}
+  //               onClick={() => setActiveSection(index)}
+  //             >
+  //               {section.title}
+  //             </button>
+  //           ))}
+  //         </div>
+  //       </div>
+  //     </section>
+  //   );
+  // };
 
   return (
     <div className="home min-vh-100 d-flex flex-column">
@@ -941,7 +876,7 @@ const LandingPage = () => {
                         width: "12px",
                         height: "12px",
                         cursor: "pointer",
-                        backgroundColor: customStyles.announcementIndicator.background,
+                        backgroundColor: "#ffc107",
                         ...(index === activeAnnouncement ? customStyles.activeIndicator : { backgroundColor: customStyles.announcementIndicator.background })
                       }}
                       onClick={() => setActiveAnnouncement(index)}
