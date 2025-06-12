@@ -70,7 +70,7 @@ const LandingPage = () => {
     });
 
     // Add warning text
-    overlay.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:32px;text-align:center;font-weight:bold;text-shadow:2px 2px 4px #000;"></div>';
+    overlay.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:32px;text-align:center;font-weight:bold;text-shadow:2px 2px 4px #000;">Screenshots are disabled on this website.</div>';
 
     // Hide all sensitive content
     const sensitiveElements = document.querySelectorAll('.sensitive-content');
